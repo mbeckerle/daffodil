@@ -29,7 +29,7 @@
       <dfdl:format ref="tns:GeneralFormatPortable"
         representation="binary"
         encodingErrorPolicy="replace" />
-    </appinfo>
+   </appinfo>
   </annotation>
 
   <xs:element name="root">

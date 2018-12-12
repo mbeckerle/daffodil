@@ -27,7 +27,7 @@
 
   <annotation>
     <appinfo source="http://www.ogf.org/dfdl/">
-      <dfdl:format ref="tns:GeneralFormat" encoding="utf-8"
+      <dfdl:format ref="tns:GeneralFormatPortable" encoding="utf-8"
         fillByte="f"
         representation="text" lengthKind="delimited"
         outputNewLine="%LF;"

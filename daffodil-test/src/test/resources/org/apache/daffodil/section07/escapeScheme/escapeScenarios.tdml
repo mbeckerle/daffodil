@@ -26,8 +26,8 @@
 
   <defineSchema name="es1">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited"
+  
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" 
         occursCountKind="implicit"/>
 
     <dfdl:defineEscapeScheme name="scenario1">
@@ -67,7 +67,7 @@
 
   <defineSchema name="es1-2">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
 
     <dfdl:defineEscapeScheme name="scenario1">
       <dfdl:escapeScheme escapeCharacter='/'
@@ -323,7 +323,7 @@
 
   <defineSchema name="es2">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited" />
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" />
 
     <dfdl:defineEscapeScheme name="scenario2">
       <dfdl:escapeScheme escapeCharacter='/'
@@ -372,7 +372,7 @@
 
   <defineSchema name="es2-2">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
 
     <dfdl:defineEscapeScheme name="scenario2">
       <dfdl:escapeScheme escapeCharacter='/'
@@ -421,7 +421,7 @@
 
   <defineSchema name="es3">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited" />
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" />
 
     <dfdl:defineEscapeScheme name="scenario3">
       <dfdl:escapeScheme escapeCharacter='/'
@@ -452,7 +452,7 @@
 
   <defineSchema name="es4-2">
     <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
-    <dfdl:format ref="tns:GeneralFormat" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
 
     <dfdl:defineEscapeScheme name="scenario4">
       <dfdl:escapeScheme escapeCharacter='/'
@@ -495,6 +495,306 @@
       <error>Parse Error</error>
     </errors>
   </parserTestCase>
+  
+  <parserTestCase name="scenario3_2" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo$/;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo/;bar</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_3" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix" roundTrip="false">
+    <!-- See DFDL-1556 for to make roundTrip="true" -->
+    <document>foo$$/;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo$/;bar</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_4" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix">
+    <document>foo//;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo/;bar</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_5" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo///;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo/</x>
+    <y>bar</y>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_6" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix">
+    <document>foo$//;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo/</x>
+    <y>bar</y>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_7" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix">
+    <document>foo$///;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo//;bar</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_8" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo$////;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo//</x>
+    <y>bar</y>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_9" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo$///////;bar</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo////;bar</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_10" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix_never"
+    roundTrip="onePass">
+    <document>foo/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix_never>
+          <x>foo</x>
+          <y></y>
+        </tns:e_infix_never>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_10_postfix" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_postfix">
+    <document>foo/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_postfix>
+          <x>foo</x>
+        </tns:e_postfix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_11" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo$/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo/;</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_11_postfix" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_postfix">
+    <document>foo$/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_postfix>
+          <x>foo/;</x>
+  </tns:e_postfix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_12" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix" roundTrip="false">
+    <!-- See DFDL-1556 for to make roundTrip="true" -->
+    <document>foo$$/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo$/;</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_12_req_term" model="es3-2"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e">
+    <document>foo$$/;</document>
+    <errors>
+      <error>Parse Error</error>
+    </errors>
+  </parserTestCase>
+
+  <parserTestCase name="scenario3_13" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix_never" 
+    roundTrip="onePass">
+    <document>foo$//;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix_never>
+          <x>foo/</x>
+          <y></y>
+        </tns:e_infix_never>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_13_postfix" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_postfix">
+    <document>foo$//;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_postfix>
+          <x>foo/</x>
+  </tns:e_postfix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_14" model="es3"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e_infix"
+    roundTrip="twoPass">
+    <document>foo$/$/$/;</document>
+    <infoset>
+      <dfdlInfoset>
+        <tns:e_infix>
+          <x>foo///;</x>
+  </tns:e_infix>
+      </dfdlInfoset>
+    </infoset>
+  </parserTestCase>
+  
+  <parserTestCase name="scenario3_14_req_term" model="es3-2"
+    description="Section 13 - escapeCharacter - DFDL-13-029R" root="e">
+    <document>foo$/$/$/;</document>
+    <errors>
+      <error>Parse Error</error>
+    </errors>
+  </parserTestCase>
+
+  <defineSchema name="es4">
+    <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" />
+
+    <dfdl:defineEscapeScheme name="scenario4">
+      <dfdl:escapeScheme escapeCharacter='/'
+        escapeKind="escapeCharacter" escapeEscapeCharacter="/" extraEscapedCharacters="" generateEscapeBlock="whenNeeded" />
+    </dfdl:defineEscapeScheme>
+   
+    <xs:element name="e_infix">
+      <xs:complexType>
+        <xs:sequence dfdl:separator="/;" dfdl:separatorPosition="infix">
+          <xs:element name="x" type="xs:string" dfdl:escapeSchemeRef="tns:scenario4" />
+          <xs:element name="y" type="xs:string" minOccurs="0" dfdl:escapeSchemeRef="tns:scenario4" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="e_infix_never">
+      <xs:complexType>
+        <xs:sequence dfdl:separator="/;" dfdl:separatorPosition="infix"
+          dfdl:separatorSuppressionPolicy="never">
+          <xs:element name="x" type="xs:string" dfdl:escapeSchemeRef="tns:scenario4" />
+          <xs:element name="y" type="xs:string" minOccurs="0" dfdl:escapeSchemeRef="tns:scenario4" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+    <xs:element name="e_postfix">
+      <xs:complexType>
+        <xs:sequence dfdl:separator="/;" dfdl:separatorPosition="postfix">
+          <xs:element name="x" type="xs:string" dfdl:escapeSchemeRef="tns:scenario4" />
+          <xs:element name="y" type="xs:string" minOccurs="0" dfdl:escapeSchemeRef="tns:scenario4" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+  </defineSchema>
+  
+  <defineSchema name="es4-2">
+    <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" documentFinalTerminatorCanBeMissing="no"/>
+
+    <dfdl:defineEscapeScheme name="scenario4">
+      <dfdl:escapeScheme escapeCharacter='/'
+        escapeKind="escapeCharacter" escapeEscapeCharacter="/" extraEscapedCharacters="" generateEscapeBlock="whenNeeded" />
+    </dfdl:defineEscapeScheme>
+    
+    <xs:element name="e">
+      <xs:complexType>
+        <xs:sequence dfdl:separator="">
+          <xs:element name="x" type="xs:string" dfdl:escapeSchemeRef="tns:scenario4" dfdl:terminator="/;"/>
+          <xs:element name="y" type="xs:string" minOccurs="0" dfdl:escapeSchemeRef="tns:scenario4" dfdl:terminator="/;" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+
+  </defineSchema>
+  
+  <defineSchema name="es5">
+    <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd"/>
+    <dfdl:format ref="tns:GeneralFormatPortable" lengthKind="delimited" />
+
+    <dfdl:defineEscapeScheme name="es">
+      <dfdl:escapeScheme escapeCharacter='\'
+        escapeKind="escapeCharacter" escapeEscapeCharacter="\" extraEscapedCharacters="" />
+    </dfdl:defineEscapeScheme>
+
+    <xs:element name="root" dfdl:initiator="START" dfdl:terminator="END END1 END2 END3 END4 END5">
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element name="field" type="xs:string" dfdl:escapeSchemeRef="tns:es"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+  </defineSchema>
 
   <parserTestCase name="scenario4_9_req_term" model="es4-2"
     description="Section 13 - escapeCharacter - DFDL-13-029R" root="e">
