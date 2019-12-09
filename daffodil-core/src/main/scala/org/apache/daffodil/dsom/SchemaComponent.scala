@@ -31,21 +31,12 @@ import org.apache.daffodil.BasicComponent
 import org.apache.daffodil.runtime1.SchemaComponentRuntime1Mixin
 import org.apache.daffodil.util.Delay
 
-abstract class SchemaComponentImpl(
-  final override val xml: Node,
-  final override val optLexicalParent: Option[SchemaComponent])
-  extends SchemaComponent {
-
-  def this(xml: Node, lexicalParent: SchemaComponent) =
-    this(xml, Option(lexicalParent))
-}
-
 /**
  * The core root class of the DFDL Schema object model.
  *
  * Every schema component has a schema document, and a schema, and a namespace.
  */
-trait SchemaComponent
+trait SchemaComponentPrimaryMixin
   extends BasicComponent
   with ImplementsThrowsOrSavesSDE
   with GetAttributesMixin
@@ -253,8 +244,8 @@ object Schema {
  * same target namespace, and in that case all those schema documents make up
  * the 'schema'.
  */
-final class Schema private (val namespace: NS, schemaDocs: Seq[SchemaDocument], schemaSetArg: SchemaSet)
-  extends SchemaComponentImpl(<fake/>, Option(schemaSetArg)) {
+abstract class SchemaImpl(val namespace: NS, schemaDocs: Seq[SchemaDocument], schemaSetArg: SchemaSet)
+  extends SchemaComponentImpl(<fake/>, Option(schemaSetArg)) { self: Schema =>
 
   override def targetNamespace: NS = namespace
 
