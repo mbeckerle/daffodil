@@ -59,20 +59,20 @@ import org.apache.daffodil.schema.annotation.props.gen.YesNo
  *
  */
 
-trait ChoiceDefMixin
+trait ChoiceDefPrimaryMixin
   extends AnnotatedSchemaComponent
-  with GroupDefLike {
+  with GroupDefLike { self: ChoiceDef =>
 
   protected def isMyFormatAnnotation(a: DFDLAnnotation) = a.isInstanceOf[DFDLChoice]
 
   protected override def annotationFactory(node: Node): Option[DFDLAnnotation] = {
     node match {
-      case <dfdl:choice>{ contents @ _* }</dfdl:choice> => Some(new DFDLChoice(node, this))
+      case <dfdl:choice>{ contents @ _* }</dfdl:choice> => Some(new DFDLChoice(node, self))
       case _ => annotationFactoryForDFDLStatement(node, this)
     }
   }
 
-  protected def emptyFormatFactory: DFDLFormatAnnotation = new DFDLChoice(newDFDLAnnotationXML("choice"), this)
+  protected def emptyFormatFactory: DFDLFormatAnnotation = new DFDLChoice(newDFDLAnnotationXML("choice"), self)
 
   lazy val xmlChildren = xml match {
     case <choice>{ c @ _* }</choice> => c

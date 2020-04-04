@@ -382,7 +382,7 @@ trait TermRuntime1Mixin { self: Term =>
             }
           res
         }
-        case c: ChoiceDefMixin => {
+        case c: ChoiceDef => {
           // This is a branch of a choice
           // So what follows this branch is whatever follows the choice
           // but we don't compute that statically, because if this

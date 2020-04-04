@@ -17,10 +17,12 @@
 
 package org.apache.daffodil.dsom
 
+import org.apache.daffodil.dsom.IIUtils.IIMap
+
 import scala.xml.Node
 import org.apache.daffodil.xml.NS
 
-trait SchemaComponent
+sealed trait SchemaComponent
   extends SchemaComponentPrimaryMixin
 
 abstract class SchemaComponentImpl(
@@ -32,5 +34,57 @@ abstract class SchemaComponentImpl(
     this(xml, Option(lexicalParent))
 }
 
+trait AnnotatedSchemaComponent
+  extends SchemaComponent
+  with AnnotatedSchemaComponentPrimaryMixin
+
+/** Convenience class for implemening AnnotatedSchemaComponent trait */
+abstract class AnnotatedSchemaComponentImpl(
+  final override val xml: Node,
+  final override val optLexicalParent: Option[SchemaComponent])
+  extends AnnotatedSchemaComponent {
+
+  def this(xml: Node, lexicalParent: SchemaComponent) =
+    this(xml, Option(lexicalParent))
+}
+
+abstract class DFDLAnnotation(xmlArg: Node, annotatedSCArg: AnnotatedSchemaComponent)
+  extends DFDLAnnotationImpl(xmlArg, annotatedSCArg)
+    with SchemaComponent
+
+abstract class IIBase( final override val xml: Node, xsdArg: XMLSchemaDocument, val seenBefore: IIMap)
+  extends SchemaComponent
+
+
+
 final class Schema(namespace: NS, schemaDocs: Seq[SchemaDocument], schemaSet: SchemaSet)
   extends SchemaImpl(namespace, schemaDocs, schemaSet)
+
+trait ChoiceDef
+  extends AnnotatedSchemaComponent
+
+abstract class GlobalGroupDef(
+  defXML: Node,
+  groupXML: Node,
+  schemaDocumentArg: SchemaDocument)
+  extends AnnotatedSchemaComponentImpl(groupXML, schemaDocumentArg)
+
+object GlobalGroupDef {
+
+  def apply(defXML: Node, schemaDocument: SchemaDocument) = {
+    val trimmedXml = scala.xml.Utility.trim(defXML)
+    trimmedXml match {
+      case <group>{ contents @ _* }</group> => {
+        val list = contents.collect {
+          case groupXML @ <sequence>{ _* }</sequence> =>
+            new GlobalSequenceGroupDef(defXML, groupXML, schemaDocument)
+          case groupXML @ <choice>{ _* }</choice> =>
+            new GlobalChoiceGroupDef(defXML, groupXML, schemaDocument)
+        }
+        val res = list(0)
+        res
+      }
+      case _ => Assert.invariantFailed("not a group")
+    }
+  }
+}

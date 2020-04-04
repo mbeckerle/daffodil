@@ -27,6 +27,7 @@ import org.apache.daffodil.schema.annotation.props.NotFound
 import org.apache.daffodil.schema.annotation.props.Found
 import org.apache.daffodil.schema.annotation.props.FindPropertyMixin
 import org.apache.daffodil.api.WarnID
+
 import scala.collection.mutable
 
 /**
@@ -188,15 +189,6 @@ trait ResolvesScopedProperties
   }
 }
 
-/** Convenience class for implemening AnnotatedSchemaComponent trait */
-abstract class AnnotatedSchemaComponentImpl(
-  final override val xml: Node,
-  final override val optLexicalParent: Option[SchemaComponent])
-  extends AnnotatedSchemaComponent {
-
-  def this(xml: Node, lexicalParent: SchemaComponent) =
-    this(xml, Option(lexicalParent))
-}
 
 /**
  * Identifies the property environment of a term.
@@ -292,10 +284,9 @@ final class SharedFactory[SharedType] {
  *
  * Not all components can carry DFDL annotations.
  */
-trait AnnotatedSchemaComponent
-  extends SchemaComponent
-  with AnnotatedMixin
-  with OverlapCheckMixin {
+trait AnnotatedSchemaComponentPrimaryMixin
+  extends AnnotatedMixin
+  with OverlapCheckMixin { self: AnnotatedSchemaComponent =>
 
   protected override def initialize(): Unit = {
     super.initialize()

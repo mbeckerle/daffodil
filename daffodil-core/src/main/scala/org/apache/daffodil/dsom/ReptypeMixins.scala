@@ -27,7 +27,7 @@ import org.apache.daffodil.processors.RepValueSet
  * Since such an element does not nessasarily exist in the schema itself, those elements which have a reptype also
  * need to get a quasi element with said type.
  */
-trait HasOptRepTypeMixinImpl extends SchemaComponent with HasOptRepTypeMixin {
+trait HasOptRepTypeMixinImpl extends HasOptRepTypeMixin { self: SchemaComponent =>
 
   override lazy val optRepTypeElement: Option[RepTypeQuasiElementDecl] =
     optRepTypeDef.map(repType => {

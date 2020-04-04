@@ -52,7 +52,7 @@ abstract class DFDLModelGroup(node: Node, decl: AnnotatedSchemaComponent)
 final class DFDLSequence(node: Node, decl: SequenceDefMixin)
   extends DFDLModelGroup(node, decl)
 
-final class DFDLChoice(node: Node, decl: ChoiceDefMixin)
+final class DFDLChoice(node: Node, decl: ChoiceDef)
   extends DFDLModelGroup(node, decl)
 
 final class DFDLSimpleType(node: Node, decl: SimpleTypeDefBase)

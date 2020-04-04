@@ -262,7 +262,7 @@ trait Term
           case sgr: SequenceGroupRef => !sgr.isOrdered
         }
       }
-      case c: ChoiceDefMixin => false
+      case c: ChoiceDef => false
       case ct: ComplexTypeBase => false
       case x => Assert.invariantFailed("Unexpected lexical parent: " + x)
     }.getOrElse(false)

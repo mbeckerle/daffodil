@@ -29,10 +29,12 @@ import java.net.URI
 import org.apache.daffodil.util.Delay
 
 import java.net.URLEncoder
+
 import org.apache.daffodil.api.DaffodilSchemaSource
 import org.apache.daffodil.api.URISchemaSource
 
 import java.net.URISyntaxException
+
 import org.apache.daffodil.api.WarnID
 
 /**
@@ -127,9 +129,8 @@ object IIUtils {
 /**
  * Include/Import = "II" for short
  */
-abstract class IIBase( final override val xml: Node, xsdArg: XMLSchemaDocument, val seenBefore: IIMap)
-  extends SchemaComponent
-  with NestingLexicalMixin {
+abstract class IIBaseImpl( final override val xml: Node, xsdArg: XMLSchemaDocument, val seenBefore: IIMap)
+  extends NestingLexicalMixin { self: IIBase =>
   final override def optLexicalParent = Option(xsdArg)
 
   /**

@@ -35,9 +35,8 @@ import org.apache.daffodil.util.Misc
  *
  *
  */
-abstract class DFDLAnnotation(xmlArg: Node, annotatedSCArg: AnnotatedSchemaComponent)
-  extends SchemaComponent
-  with NestingLexicalMixin {
+abstract class DFDLAnnotationImpl(xmlArg: Node, annotatedSCArg: AnnotatedSchemaComponent)
+  extends NestingLexicalMixin { self: DFDLAnnotation =>
 
   final override val xml = xmlArg
 

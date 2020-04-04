@@ -104,11 +104,11 @@ trait GroupDefLike
  * or xs:choice XML child. When we refer to the annotations on a global group
  * definition, we are referring to the annotations on the xs:sequence or xs:choice.
  */
-sealed abstract class GlobalGroupDef(
+sealed abstract class GlobalGroupDefImpl(
   defXML: Node,
   groupXML: Node,
   schemaDocumentArg: SchemaDocument)
-  extends AnnotatedSchemaComponentImpl(groupXML, schemaDocumentArg)
+  extends GlobalGroupDef(groupXML, schemaDocumentArg)
   with GroupDefLike
   with GlobalNonElementComponentMixin
   with NestingLexicalMixin
@@ -167,4 +167,4 @@ object GlobalChoiceGroupDef {
 final class GlobalChoiceGroupDef private (
   defXMLArg: Node, choiceXML: Node, schemaDocument: SchemaDocument)
   extends GlobalGroupDef(defXMLArg, choiceXML, schemaDocument)
-  with ChoiceDefMixin
+  with ChoiceDef
