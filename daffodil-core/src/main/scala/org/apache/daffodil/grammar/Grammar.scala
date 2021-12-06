@@ -81,31 +81,7 @@ class SeqComp private (context: SchemaComponent, children: Seq[Gram]) extends Bi
   protected final override def open = "("
   protected final override def close = ")"
 
-  lazy val parserChildren = children.filter(_.forWhat != ForUnparser).map { _.parser }.filterNot { _.isInstanceOf[NadaParser] }
 
-  final override lazy val parser = {
-    if (parserChildren.isEmpty) new NadaParser(context.runtimeData)
-    else if (parserChildren.length == 1) parserChildren.head
-    else new SeqCompParser(context.runtimeData, parserChildren.toVector)
-  }
-
-  lazy val unparserChildren = {
-    val unparserKeptChildren =
-      children.filter(
-        x =>
-          !x.isEmpty && (x.forWhat != ForParser))
-    val unparsers =
-      unparserKeptChildren.map { x =>
-        x.unparser
-      }.filterNot { _.isInstanceOf[NadaUnparser] }
-    unparsers
-  }
-
-  final override lazy val unparser = {
-    if (unparserChildren.isEmpty) new NadaUnparser(context.runtimeData)
-    else if (unparserChildren.length == 1) unparserChildren.head
-    else new SeqCompUnparser(context.runtimeData, unparserChildren.toVector)
-  }
 }
 
 object EmptyGram extends Gram(null) {

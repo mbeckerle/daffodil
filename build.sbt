@@ -89,6 +89,10 @@ lazy val runtime2         = Project("daffodil-runtime2", file("daffodil-runtime2
                                 Compile / cFlags := (Compile / cFlags).value.withDefaultValue(Seq("-Wall", "-Wextra", "-Wpedantic", "-std=gnu11"))
                               )
 
+//lazy val schema-compiler = Project("daffodil-schema-compiler", file("daffodil-schema-compiler")).configs(IntegrationTest)
+//                               .dependsOn(udf, lib % "test->test")
+//                               .settings(commonSettings)
+
 lazy val core             = Project("daffodil-core", file("daffodil-core")).configs(IntegrationTest)
                               .dependsOn(runtime1Unparser, udf, lib % "test->test", runtime1 % "test->test", io % "test->test")
                               .settings(commonSettings)

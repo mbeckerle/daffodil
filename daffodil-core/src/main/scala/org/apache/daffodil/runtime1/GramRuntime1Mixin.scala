@@ -21,9 +21,19 @@ import org.apache.daffodil.grammar.Gram
 import org.apache.daffodil.util.Maybe
 import org.apache.daffodil.processors.unparsers.Unparser
 import org.apache.daffodil.exceptions.Assert
+import org.apache.daffodil.grammar.SeqComp
 import org.apache.daffodil.processors.parsers.Parser
 
-trait GramRuntime1Mixin { self: Gram =>
+object GramRuntime1 {
+  implicit def GramToRuntime1(gram: Gram): GramRuntime1 = GramRuntime1(gram)
+
+  def apply(gram: Gram): GramRuntime1 = {
+    gram match {
+      case sc: SeqComp => SeqCompRuntime1(sc)
+    }
+  }
+}
+abstract class GramRuntime1(gram: Gram){
 
   /**
    * Provides parser.
@@ -33,7 +43,7 @@ trait GramRuntime1Mixin { self: Gram =>
   def parser: Parser
 
   final def maybeParser: Maybe[Parser] = {
-    if (this.isEmpty) Maybe.Nope
+    if (gram.isEmpty) Maybe.Nope
     else {
       val p = this.parser
       if (p.isEmpty) Maybe.Nope
@@ -52,7 +62,7 @@ trait GramRuntime1Mixin { self: Gram =>
   def unparser: Unparser
 
   final lazy val maybeUnparser: Maybe[Unparser] = {
-    if (this.isEmpty) Maybe.Nope
+    if (gram.isEmpty) Maybe.Nope
     else {
       val u = this.unparser
       if (u.isEmpty) Maybe.Nope
