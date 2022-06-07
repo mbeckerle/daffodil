@@ -20,11 +20,12 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
   xmlns="http://www.w3.org/2001/XMLSchema" 
   targetNamespace="http://www.ibm.com/xmlns/dfdl/testData" 
-  xmlns:tns="http://www.ibm.com/xmlns/dfdl/testData" 
+  xmlns:tdml="http://www.ibm.com/xmlns/dfdl/testData" 
   elementFormDefault="unqualified"
   xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" 
   xmlns:daf="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
   <xsd:import namespace="http://www.w3.org/2001/XMLSchema" />
   <xsd:import namespace="urn:ogf:dfdl:2013:imp:daffodil.apache.org:2018:ext" />
@@ -56,25 +57,25 @@
     <complexType>
       <sequence>
         <choice maxOccurs="unbounded" minOccurs="0">
-          <element ref="tns:tutorial"/>
-          <element ref="tns:parserTestCase"/>
+          <element ref="tdml:tutorial"/>
+          <element ref="tdml:parserTestCase"/>
           <!-- This is an extension to the IBM TDML language. We allow schemas 
             to be directly embedded inside the TDML file. A TDML file that contains all 
             the schemas it needs is a "self contained" TDML file. -->
-          <element ref="tns:defineSchema" minOccurs="0"/>
+          <element ref="tdml:defineSchema" minOccurs="0"/>
 
-          <element ref="tns:defineConfig" minOccurs="0"/>
+          <element ref="tdml:defineConfig" minOccurs="0"/>
 
-          <element ref="tns:unparserTestCase"/>
+          <element ref="tdml:unparserTestCase"/>
         </choice>
       </sequence>
       <attribute name="suiteName" type="xs:token" use="optional"/>
       <attribute name="ID" type="xs:token" use="optional"/>
       <attribute name="description" type="xs:string" use="optional"/>
-      <attribute name="defaultRoundTrip" type="tns:roundTripType" use="optional"/>
-      <attribute name="defaultValidation" type="tns:validationType" use="optional"/>
+      <attribute name="defaultRoundTrip" type="tdml:roundTripType" use="optional"/>
+      <attribute name="defaultValidation" type="tdml:validationType" use="optional"/>
       <attribute name="defaultConfig" type="xs:string" use="optional"/>
-      <attribute name="defaultImplementations" type="tns:implementationsType" use="optional"/>
+      <attribute name="defaultImplementations" type="tdml:implementationsType" use="optional"/>
     </complexType>
     <unique name="unique-parserTestCase-name">
       <selector xpath="parserTestCase"/>
@@ -95,7 +96,7 @@
   </element>
   
   <simpleType name="implementationsType">
-    <list itemType="tns:implementationItem"/>
+    <list itemType="tdml:implementationItem"/>
   </simpleType>
   
   <simpleType name="implementationItem">
@@ -106,11 +107,23 @@
     </restriction>
   </simpleType>
   
-<!-- We want to allow an xsd:schema to be named and directly embedded in 
-  the TDML thereby allowing a fully-self-contained single file test case as 
-  an exchange medium for tests. -->
 
-  <element name="defineSchema" type="tns:defineSchemaType"/>
+
+  <element name="defineSchema" type="tdml:defineSchemaType">
+    <annotation><documentation><pre xmlns="http://www.w3.org/1999/xhtml">
+      Contains an xsd:schema directly within the TDML enabling a fully 
+      self-contained single file test case as an exchange medium for tests.
+
+      Suggested usage &lt;defineSchema name="..." useDefaultNamepace='false' elementFormDefault='unqualified'&gt;
+      These are not the default values for historical reasons only. They are better defaults to use than the default
+      values of these attributes.
+
+      Unlike a regular DFDL schema file, inside of TDML defineSchema you must not 
+      encapsulate a dfdl:format annotation within xs:annotation and xs:appinfo, as it is directly 
+      recognized by the TDML processor. 
+      </pre>
+    </documentation></annotation>
+  </element>
   <complexType name="defineSchemaType">
     <choice maxOccurs='unbounded'>
       <element ref='dfdl:format'/>
@@ -128,7 +141,7 @@
     <attribute name="name" type="xs:NCName" use="required"/>
                 <!-- We want the default to be 'unqualified' in the longer term but 
                      we leave it 'qualified here to prevent lots of tests from breaking. -->
-    <attribute name="elementFormDefault" type="tns:elementFormDefaultType" default="qualified"/>
+    <attribute name="elementFormDefault" type="tdml:elementFormDefaultType" default="qualified"/>
         <!-- we want the default for useDefaultNamespace to be false longer term but
              we leave it as true here to prevent lots of tests from breaking.
              81 tests to be exact. -->
@@ -145,10 +158,10 @@
         False is recommended since default namespaces can be confusing.
       </documentation></annotation>
     </attribute>
-    <attribute ref="tns:tutorialInclude"/>
+    <attribute ref="tdml:tutorialInclude"/>
   </complexType>
 
-  <element name="defineConfig" type="tns:defineConfigType"/>
+  <element name="defineConfig" type="tdml:defineConfigType"/>
   <complexType name="defineConfigType">
     <sequence>
       <element ref="daf:externalVariableBindings" minOccurs="0" maxOccurs="1"/>
@@ -158,18 +171,18 @@
   </complexType>
 
 
-  <element name="parserTestCase" type="tns:parserTestCaseType"/>
+  <element name="parserTestCase" type="tdml:parserTestCaseType"/>
   <complexType name="parserTestCaseType">
     <choice minOccurs="2" maxOccurs="11">
       <!-- we can't enforce the cardinality in XSD 1.0 -->
-      <element ref="tns:tutorial"/>
-      <element ref="tns:document"/>
-      <element ref="tns:infoset"/>
-      <element ref="tns:errors"/>
-      <element ref="tns:warnings" minOccurs='0'/>
-      <element ref="tns:validationErrors" minOccurs="0"/>
+      <element ref="tdml:tutorial"/>
+      <element ref="tdml:document"/>
+      <element ref="tdml:infoset"/>
+      <element ref="tdml:errors"/>
+      <element ref="tdml:warnings" minOccurs='0'/>
+      <element ref="tdml:validationErrors" minOccurs="0"/>
     </choice>
-    <attributeGroup ref="tns:testCaseAttribs"/>
+    <attributeGroup ref="tdml:testCaseAttribs"/>
   </complexType>
 
   <attributeGroup name="testCaseAttribs">
@@ -179,11 +192,11 @@
     <attribute name="rootNS" type="xs:string" use="optional"/> <!-- only needed when there is no infoset. -->
     <attribute name="model" type="xs:string" use="optional"/> <!-- is there a type for a path/uri? -->
     <attribute name="config" type="xs:string" use="optional"/> <!-- is there a type for a path/uri? -->
-    <attribute name="roundTrip" type="tns:roundTripType" use="optional"/>
+    <attribute name="roundTrip" type="tdml:roundTripType" use="optional"/>
     <attribute name="description" type="xs:string" use="optional"/>
     <attribute name="unsupported" type="xs:boolean" use="optional" default="false"/>
-    <attribute name="validation" type="tns:validationType" use="optional"/>
-    <attribute name="implementations" type="tns:implementationsType" use="optional"/>
+    <attribute name="validation" type="tdml:validationType" use="optional"/>
+    <attribute name="implementations" type="tdml:implementationsType" use="optional"/>
 
   </attributeGroup>
 
@@ -228,27 +241,27 @@
     </restriction>
   </simpleType>
 
-  <element name="document" type="tns:documentType"/>
-  <element name="infoset" type="tns:infosetType"/>
-  <element name="errors" type="tns:errorsType"/>
-  <element name="warnings" type="tns:warningsType"/>
-  <element name="validationErrors" type="tns:validationErrorsType"/>
+  <element name="document" type="tdml:documentType"/>
+  <element name="infoset" type="tdml:infosetType"/>
+  <element name="errors" type="tdml:errorsType"/>
+  <element name="warnings" type="tdml:warningsType"/>
+  <element name="validationErrors" type="tdml:validationErrorsType"/>
 
   <complexType name="documentType" mixed="true">
     <sequence>
-      <element ref="tns:documentPart" minOccurs="0" maxOccurs="unbounded"/>
+      <element ref="tdml:documentPart" minOccurs="0" maxOccurs="unbounded"/>
     </sequence>
-    <attribute name="bitOrder" type="tns:bitOrderEnum" use="optional"/>
-    <attribute ref="tns:tutorialInclude"/>
+    <attribute name="bitOrder" type="tdml:bitOrderEnum" use="optional"/>
+    <attribute ref="tdml:tutorialInclude"/>
   </complexType>
 
-  <element name="documentPart" type="tns:documentPartType"/>
+  <element name="documentPart" type="tdml:documentPartType"/>
   <complexType name="documentPartType">
     <simpleContent>
       <extension base="xs:string">
-        <attribute name="type" type="tns:documentPartTypeEnum" use="required"/>
+        <attribute name="type" type="tdml:documentPartTypeEnum" use="required"/>
         <attribute name="replaceDFDLEntities" type="xs:boolean"/>
-        <attributeGroup ref="tns:bitOrderAG"/>
+        <attributeGroup ref="tdml:bitOrderAG"/>
         <attribute name="encoding" type="xs:token" use="optional"/>
       </extension>
     </simpleContent>
@@ -264,8 +277,8 @@
   </simpleType>
 
   <attributeGroup name="bitOrderAG">
-    <attribute name="bitOrder" type="tns:bitOrderEnum" use="optional"/>
-    <attribute name="byteOrder" type="tns:byteOrderEnum" use="optional"/>
+    <attribute name="bitOrder" type="tdml:bitOrderEnum" use="optional"/>
+    <attribute name="byteOrder" type="tdml:byteOrderEnum" use="optional"/>
   </attributeGroup>
 
   <simpleType name="byteOrderEnum">
@@ -296,12 +309,12 @@
 
   <complexType name="infosetType">
     <sequence>
-      <element ref="tns:dfdlInfoset"/>
+      <element ref="tdml:dfdlInfoset"/>
     </sequence>
-    <attribute ref="tns:tutorialInclude"/>
+    <attribute ref="tdml:tutorialInclude"/>
   </complexType>
 
-  <element name="dfdlInfoset" type="tns:dfdlInfosetType"/>
+  <element name="dfdlInfoset" type="tdml:dfdlInfosetType"/>
 
   <complexType name="dfdlInfosetType" mixed="true">
     <sequence>
@@ -319,25 +332,25 @@
 
   <complexType name="errorsType">
     <sequence>
-      <element ref="tns:error" maxOccurs="unbounded" minOccurs="1"/>
+      <element ref="tdml:error" maxOccurs="unbounded" minOccurs="1"/>
     </sequence>
-    <attributeGroup ref="tns:errorWarnAttribs"/>
+    <attributeGroup ref="tdml:errorWarnAttribs"/>
   </complexType>
 
   <complexType name="warningsType">
     <sequence>
-      <element ref="tns:warning" maxOccurs="unbounded" minOccurs="0"/>
+      <element ref="tdml:warning" maxOccurs="unbounded" minOccurs="0"/>
                         <!-- use <warnings/> to indicate no warnings should occur. -->
     </sequence>
-    <attributeGroup ref="tns:errorWarnAttribs"/>
+    <attributeGroup ref="tdml:errorWarnAttribs"/>
   </complexType>
 
   <complexType name="validationErrorsType">
     <sequence>
-      <element ref="tns:error" maxOccurs="unbounded" minOccurs="0"/>
+      <element ref="tdml:error" maxOccurs="unbounded" minOccurs="0"/>
                         <!-- use <validationErrors/> to indicate no validation should occur. -->
     </sequence>
-    <attributeGroup ref="tns:errorWarnAttribs"/>
+    <attributeGroup ref="tdml:errorWarnAttribs"/>
   </complexType>
 
   <element name="error" type="xs:string"/>
@@ -354,17 +367,17 @@
     </xs:attribute>
   </xs:attributeGroup>
 
-  <element name="unparserTestCase" type="tns:unparserTestCaseType"/>
+  <element name="unparserTestCase" type="tdml:unparserTestCaseType"/>
   <complexType name="unparserTestCaseType">
     <choice minOccurs="2" maxOccurs="9">
       <!-- we just can't enforce cardinality of any of these things using XSD 1.0 -->
-      <element ref="tns:tutorial"/> <!-- these before, between, or after any of the others -->
-      <element ref="tns:infoset"/> <!-- required -->
-      <element ref="tns:document"/> <!-- must have either document, or errors, or both -->
-      <element ref="tns:errors"/>
-      <element ref="tns:warnings"/>
+      <element ref="tdml:tutorial"/> <!-- these before, between, or after any of the others -->
+      <element ref="tdml:infoset"/> <!-- required -->
+      <element ref="tdml:document"/> <!-- must have either document, or errors, or both -->
+      <element ref="tdml:errors"/>
+      <element ref="tdml:warnings"/>
     </choice>
-    <attributeGroup ref="tns:testCaseAttribs"/>
+    <attributeGroup ref="tdml:testCaseAttribs"/>
   </complexType>
 
 </xsd:schema>
