@@ -114,7 +114,12 @@
       Contains an xsd:schema directly within the TDML enabling a fully 
       self-contained single file test case as an exchange medium for tests.
 
-      Suggested usage &lt;defineSchema name="..." useDefaultNamepace='false' elementFormDefault='unqualified'&gt;
+      Suggested usage 
+      
+          &lt;defineSchema name="..." useDefaultNamepace='false' elementFormDefault='unqualified'&gt;
+              ...
+          &lt;/defineSchema&gt;
+
       These are not the default values for historical reasons only. They are better defaults to use than the default
       values of these attributes.
 
