@@ -18,15 +18,16 @@
 package org.apache.daffodil.runtime1.infoset
 
 import java.nio.charset.StandardCharsets
-
 import org.apache.daffodil.lib.util.Indentable
 import org.apache.daffodil.lib.util.MStackOfBoolean
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-
 import com.fasterxml.jackson.core.io.JsonStringEncoder
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 
 class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
-  extends InfosetOutputter
+  extends InfosetOutputterImpl
   with Indentable {
 
   def this(os: java.io.OutputStream, pretty: Boolean) = {
@@ -92,7 +93,8 @@ class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
     if (pretty) outputIndentation(writer)
   }
 
-  override def startSimple(simple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val simple = se.asInstanceOf[DISimple]
     startNode()
     startElement(simple)
     if (!isNilled(simple) && simple.hasValue) {
@@ -112,11 +114,12 @@ class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
     }
   }
 
-  override def endSimple(simple: DISimple): Unit = {
+  override def endSimple(se: InfosetSimpleElement): Unit = {
     // nothing to do
   }
 
-  override def startComplex(complex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val complex = ce.asInstanceOf[DIComplex]
     startNode()
     startElement(complex)
     if (!isNilled(complex)) {
@@ -127,7 +130,8 @@ class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
     }
   }
 
-  override def endComplex(complex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val complex = ce.asInstanceOf[DIComplex]
     if (!isNilled(complex)) {
       endNodeWithChildren()
       writer.write('}')
@@ -136,7 +140,8 @@ class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
     }
   }
 
-  override def startArray(array: DIArray): Unit = {
+  override def startArray(ar: InfosetArray): Unit = {
+    val array = ar.asInstanceOf[DIArray]
     startNode()
     writer.write('"')
     writer.write(array.erd.name)
@@ -144,7 +149,8 @@ class JsonInfosetOutputter private (writer: java.io.Writer, pretty: Boolean)
     prepareForChildren()
   }
 
-  override def endArray(array: DIArray): Unit = {
+  override def endArray(ar: InfosetArray): Unit = {
+    val array = ar.asInstanceOf[DIArray]
     endNodeWithChildren()
     writer.write(']')
   }

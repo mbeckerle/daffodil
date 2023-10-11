@@ -25,9 +25,9 @@ import org.apache.daffodil.japi.Daffodil;
 import org.apache.daffodil.japi.DataProcessor;
 import org.apache.daffodil.japi.ParseResult;
 import org.apache.daffodil.japi.ProcessorFactory;
-import org.apache.daffodil.japi.infoset.JDOMInfosetOutputter;
 import org.apache.daffodil.japi.io.InputSourceDataInputStream;
 import org.apache.daffodil.lib.validation.Validators;
+import org.apache.daffodil.runtime1.infoset.JDOMInfosetOutputter;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

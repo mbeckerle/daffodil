@@ -20,9 +20,11 @@ package org.apache.daffodil.example
 import scala.collection.mutable.ArrayBuffer
 
 import org.apache.daffodil.lib.util.MaybeBoolean
-// TODO: Shouldn't need to import things not in the sapi package
+import org.apache.daffodil.runtime1.api.BlobMethodsImpl
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-import org.apache.daffodil.runtime1.infoset.DIArray
 import org.apache.daffodil.runtime1.infoset.DIComplex
 import org.apache.daffodil.runtime1.infoset.DISimple
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType
@@ -30,6 +32,8 @@ import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.EndDocument
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.EndElement
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.StartDocument
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.StartElement
+import org.apache.daffodil.runtime1.api.Status.READY
+import org.apache.daffodil.runtime1.api.Status.Status
 import org.apache.daffodil.sapi.infoset.InfosetInputter
 import org.apache.daffodil.sapi.infoset.InfosetOutputter
 
@@ -89,7 +93,7 @@ case class TestInfosetInputter(events: TestInfosetEvent*) extends InfosetInputte
   override def fini(): Unit = {}
 }
 
-case class TestInfosetOutputter() extends InfosetOutputter {
+case class TestInfosetOutputter() extends BlobMethodsImpl with InfosetOutputter {
 
   val events = new ArrayBuffer[TestInfosetEvent]()
 
@@ -105,7 +109,8 @@ case class TestInfosetOutputter() extends InfosetOutputter {
     events.append(TestInfosetEvent.endDocument())
   }
 
-  override def startSimple(diSimple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
     events.append(
       TestInfosetEvent.startSimple(
         diSimple.erd.name,
@@ -116,13 +121,15 @@ case class TestInfosetOutputter() extends InfosetOutputter {
     )
   }
 
-  override def endSimple(diSimple: DISimple): Unit = {
+  override def endSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
     events.append(
       TestInfosetEvent.endSimple(diSimple.erd.name, diSimple.erd.namedQName.namespace),
     )
   }
 
-  override def startComplex(diComplex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     events.append(
       TestInfosetEvent.startComplex(
         diComplex.erd.name,
@@ -132,13 +139,17 @@ case class TestInfosetOutputter() extends InfosetOutputter {
     )
   }
 
-  override def endComplex(diComplex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     events.append(
       TestInfosetEvent.endComplex(diComplex.erd.name, diComplex.erd.namedQName.namespace),
     )
   }
 
-  override def startArray(diArray: DIArray): Unit = {}
+  override def startArray(ar: InfosetArray): Unit = {}
 
-  override def endArray(diArray: DIArray): Unit = {}
+  override def endArray(ar: InfosetArray): Unit = {}
+
+  override def getStatus(): Status = READY
+
 }

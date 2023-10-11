@@ -53,8 +53,8 @@ case object UpMove extends RecipeOp {
 case object UpMoveArray extends RecipeOp {
   override def run(dstate: DState): Unit = {
     val now = dstate.currentElement
-    Assert.invariant(now.toParent.array.isDefined)
-    val n = now.toParent.array.get
+    Assert.invariant(now.toParent.maybeArray.isDefined)
+    val n = now.toParent.maybeArray.get
     dstate.setCurrentNode(n.asInstanceOf[DIArray])
   }
 }

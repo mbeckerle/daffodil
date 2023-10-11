@@ -43,6 +43,8 @@ import org.apache.daffodil.lib.util.MaybeULong
 import org.apache.daffodil.lib.util.Pool
 import org.apache.daffodil.lib.util.Poolable
 import org.apache.daffodil.runtime1.api.DFDL
+import org.apache.daffodil.runtime1.api.InfosetDocument
+import org.apache.daffodil.runtime1.api.InfosetOutputter
 import org.apache.daffodil.runtime1.infoset.DIComplex
 import org.apache.daffodil.runtime1.infoset.DIComplexState
 import org.apache.daffodil.runtime1.infoset.DIElement
@@ -50,8 +52,6 @@ import org.apache.daffodil.runtime1.infoset.DISimple
 import org.apache.daffodil.runtime1.infoset.DISimpleState
 import org.apache.daffodil.runtime1.infoset.DataValue.DataValuePrimitive
 import org.apache.daffodil.runtime1.infoset.Infoset
-import org.apache.daffodil.runtime1.infoset.InfosetDocument
-import org.apache.daffodil.runtime1.infoset.InfosetOutputter
 import org.apache.daffodil.runtime1.infoset.InfosetWalker
 import org.apache.daffodil.runtime1.processors.DataLoc
 import org.apache.daffodil.runtime1.processors.DataProcessor

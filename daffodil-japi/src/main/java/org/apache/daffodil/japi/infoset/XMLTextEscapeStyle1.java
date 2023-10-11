@@ -20,7 +20,7 @@ package org.apache.daffodil.japi.infoset;
 /**
  * XMLTextEscapeStyles for determining whether to wrap info in CDATA tags
  */
-public enum XMLTextEscapeStyle {
+public enum XMLTextEscapeStyle1 {
   /**
    * Special characters (quotation mark, ampersand, less-than, greater-than) in the
    * text of xs:string elements are escaped, while non-special characters are written

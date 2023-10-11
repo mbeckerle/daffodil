@@ -21,6 +21,7 @@ import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.exceptions.ThrowsSDE
 import org.apache.daffodil.lib.util.MStackOf
 import org.apache.daffodil.lib.util.MStackOfInt
+import org.apache.daffodil.runtime1.api.InfosetOutputter
 
 object InfosetWalker {
 
@@ -93,7 +94,7 @@ object InfosetWalker {
         // container of the root node to start at and finds the index in that
         // container
         val container: DINode =
-          if (root.array.isDefined) root.array.get.asInstanceOf[DINode]
+          if (root.maybeArray.isDefined) root.maybeArray.get.asInstanceOf[DINode]
           else root.parent.asInstanceOf[DINode]
         (container, container.contents.indexOf(root))
       }

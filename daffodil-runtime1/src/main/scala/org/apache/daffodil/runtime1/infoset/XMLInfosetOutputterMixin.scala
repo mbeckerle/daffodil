@@ -21,7 +21,7 @@ import org.apache.daffodil.lib.equality._
 import org.apache.daffodil.lib.util.Maybe
 import org.apache.daffodil.lib.xml.XMLUtils
 
-trait XMLInfosetOutputter {
+trait XMLInfosetOutputterMixin {
 
   def remapped(dataValueAsString: String) =
     XMLUtils.remapXMLIllegalCharactersToPUA(dataValueAsString)

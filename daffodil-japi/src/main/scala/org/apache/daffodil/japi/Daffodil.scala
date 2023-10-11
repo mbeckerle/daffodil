@@ -49,6 +49,8 @@ import org.apache.daffodil.runtime1.api.DFDL.{
 import org.apache.daffodil.runtime1.api.DFDL.{
   DaffodilUnparseErrorSAXException => SDaffodilUnparseErrorSAXException,
 }
+import org.apache.daffodil.runtime1.api.InfosetOutputter
+import org.apache.daffodil.runtime1.api.MetadataHandler
 import org.apache.daffodil.runtime1.debugger.Debugger
 import org.apache.daffodil.runtime1.debugger.{ InteractiveDebugger => SInteractiveDebugger }
 import org.apache.daffodil.runtime1.debugger.{ TraceDebuggerRunner => STraceDebuggerRunner }
@@ -401,6 +403,12 @@ class DataProcessor private[japi] (private var dp: SDataProcessor)
   extends WithDiagnostics(dp)
   with Serializable {
 
+  /**
+   * For use by the JAPI implementation only.
+   * @return the underlying data processor
+   */
+  private[japi] def getUnderlyingDataProcessor = dp
+
   private def copy(dp: SDataProcessor = dp) = new DataProcessor(dp)
 
   /**
@@ -513,6 +521,12 @@ class DataProcessor private[japi] (private var dp: SDataProcessor)
    * @param output the byte channel to write the [[DataProcessor]] to
    */
   def save(output: WritableByteChannel): Unit = dp.save(output)
+
+  /**
+   * Walks the handler over the runtime metadata structures
+   * @param handler - the handler is called-back during the walk as each metadata structure is encountered.
+   */
+  def walkMetadata(handler: MetadataHandler) = dp.walkMetadata(handler)
 
   /**
    *  Obtain a new [[DaffodilParseXMLReader]] from the current [[DataProcessor]].

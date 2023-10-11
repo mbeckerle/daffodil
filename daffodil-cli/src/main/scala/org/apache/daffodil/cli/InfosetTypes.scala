@@ -39,7 +39,6 @@ import org.apache.daffodil.runtime1.api.DFDL.DataProcessor
 import org.apache.daffodil.runtime1.api.DFDL.ParseResult
 import org.apache.daffodil.runtime1.api.DFDL.UnparseResult
 import org.apache.daffodil.runtime1.infoset.InfosetInputter
-import org.apache.daffodil.runtime1.infoset.InfosetOutputter
 import org.apache.daffodil.runtime1.infoset.JDOMInfosetInputter
 import org.apache.daffodil.runtime1.infoset.JDOMInfosetOutputter
 import org.apache.daffodil.runtime1.infoset.JsonInfosetInputter
@@ -60,6 +59,7 @@ import com.siemens.ct.exi.grammars.GrammarFactory
 import com.siemens.ct.exi.main.api.sax.EXIResult
 import com.siemens.ct.exi.main.api.sax.EXISource
 import org.apache.commons.io.IOUtils
+import org.apache.daffodil.runtime1.api.InfosetOutputter
 import org.xml.sax.Attributes
 import org.xml.sax.ContentHandler
 import org.xml.sax.InputSource

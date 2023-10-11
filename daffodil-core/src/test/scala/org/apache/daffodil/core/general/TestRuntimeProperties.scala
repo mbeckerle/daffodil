@@ -21,11 +21,11 @@ import org.apache.daffodil.core.util.TestUtils
 import org.apache.daffodil.io.InputSourceDataInputStream
 import org.apache.daffodil.lib.Implicits.intercept
 import org.apache.daffodil.lib.util.SchemaUtils
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 import org.apache.daffodil.runtime1.infoset.DISimple
 import org.apache.daffodil.runtime1.infoset.ScalaXMLInfosetInputter
 import org.apache.daffodil.runtime1.infoset.ScalaXMLInfosetOutputter
-
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -37,7 +37,8 @@ import org.junit.Test
  */
 class RedactingScalaXMLInfosetOutputter extends ScalaXMLInfosetOutputter {
 
-  override def startSimple(diSimple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
     super.startSimple(diSimple)
 
     val runtimeProperties = diSimple.erd.runtimeProperties

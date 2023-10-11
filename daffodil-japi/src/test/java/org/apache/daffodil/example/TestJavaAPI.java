@@ -37,17 +37,19 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.daffodil.runtime1.infoset.JDOMInfosetOutputter;
+import org.apache.daffodil.runtime1.infoset.XMLTextEscapeStyle;
+import org.apache.daffodil.runtime1.infoset.XMLTextInfosetOutputter;
 import scala.collection.JavaConverters;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.daffodil.japi.*;
-import org.apache.daffodil.japi.infoset.XMLTextInfosetOutputter;
 import org.jdom2.output.Format;
 import org.junit.Test;
 
 import org.apache.daffodil.japi.infoset.JDOMInfosetInputter;
-import org.apache.daffodil.japi.infoset.JDOMInfosetOutputter;
 import org.apache.daffodil.japi.io.InputSourceDataInputStream;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
@@ -878,7 +880,7 @@ public class TestJavaAPI {
         InputSourceDataInputStream disDP = new InputSourceDataInputStream(fisDP);
         InputSourceDataInputStream disSAX = new InputSourceDataInputStream(fisSAX);
         ByteArrayOutputStream xmlBos = new ByteArrayOutputStream();
-        XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(xmlBos, true);
+        XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(xmlBos, true, XMLTextEscapeStyle.Standard(), false);
         ParseResult res = dp.parse(disDP, outputter);
         String infosetDPString = xmlBos.toString();
 
@@ -1238,7 +1240,7 @@ public class TestJavaAPI {
     public void testJavaAPINullXMLTextEscapeStyle() throws IOException, ClassNotFoundException {
         ByteArrayOutputStream xmlBos = new ByteArrayOutputStream();
         try {
-            XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(xmlBos, true, null);
+            XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(xmlBos, true, null, false);
         } catch (Exception e) {
             String msg = e.getMessage().toLowerCase();
             assertTrue(msg.contains("unrecognized"));
@@ -1298,7 +1300,7 @@ public class TestJavaAPI {
         ByteArrayInputStream is = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         InputSourceDataInputStream input = new InputSourceDataInputStream(is);
         ByteArrayOutputStream bosDP = new ByteArrayOutputStream();
-        XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(bosDP, true, XMLTextEscapeStyle.CDATA);
+        XMLTextInfosetOutputter outputter = new XMLTextInfosetOutputter(bosDP, true, XMLTextEscapeStyle.CDATA(), false);
         ParseResult res = dp.parse(input, outputter);
         boolean err = res.isError();
 
@@ -1328,7 +1330,7 @@ public class TestJavaAPI {
         Path blobDir = Files.createTempDirectory(blobRoot, "blob-");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        XMLTextInfosetOutputter output = new XMLTextInfosetOutputter(bos, true);
+        XMLTextInfosetOutputter output = new XMLTextInfosetOutputter(bos, true, XMLTextEscapeStyle.Standard(), false);
         output.setBlobAttributes(blobDir, "pre-", ".suf");
 
         ParseResult res = dp.parse(input, output);

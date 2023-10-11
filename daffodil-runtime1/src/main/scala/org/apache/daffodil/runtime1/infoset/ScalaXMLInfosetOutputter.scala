@@ -21,16 +21,18 @@ import scala.collection.mutable.ListBuffer
 import scala.xml.MetaData
 import scala.xml.Null
 import scala.xml.UnprefixedAttribute
-
 import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.util.MStackOf
 import org.apache.daffodil.lib.util.Maybe
 import org.apache.daffodil.lib.xml.XMLUtils
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 
 class ScalaXMLInfosetOutputter(showFormatInfo: Boolean = false, showFreedInfo: Boolean = false)
-  extends InfosetOutputter
-  with XMLInfosetOutputter {
+  extends InfosetOutputterImpl
+  with XMLInfosetOutputterMixin {
 
   protected val stack = new MStackOf[ListBuffer[scala.xml.Node]]
   private var resultNode: Maybe[scala.xml.Node] = Maybe.Nope
@@ -75,7 +77,8 @@ class ScalaXMLInfosetOutputter(showFormatInfo: Boolean = false, showFreedInfo: B
     freedAttr
   }
 
-  def startSimple(diSimple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
 
     val attributes = getAttributes(diSimple)
 
@@ -106,13 +109,15 @@ class ScalaXMLInfosetOutputter(showFormatInfo: Boolean = false, showFreedInfo: B
     stack.top.append(elemWithFmt)
   }
 
-  def endSimple(diSimple: DISimple): Unit = {}
+  override def endSimple(se: InfosetSimpleElement): Unit = {}
 
-  def startComplex(diComplex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     stack.push(new ListBuffer())
   }
 
-  def endComplex(diComplex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
 
     val attributes = getAttributes(diComplex)
     val children = stack.pop
@@ -131,10 +136,10 @@ class ScalaXMLInfosetOutputter(showFormatInfo: Boolean = false, showFreedInfo: B
     stack.top.append(elemWithFmt)
   }
 
-  def startArray(diArray: DIArray): Unit = {
+  override def startArray(ar: InfosetArray): Unit = {
     // Array elements are started individually
   }
-  def endArray(diArray: DIArray): Unit = {}
+  def endArray(ar: InfosetArray): Unit = {}
 
   def getResult(): scala.xml.Node = {
     Assert.usage(

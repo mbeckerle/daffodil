@@ -17,124 +17,16 @@
 
 package org.apache.daffodil.runtime1.infoset
 
-import java.nio.file.Path
-import java.nio.file.Paths
+import org.apache.daffodil.runtime1.api.BlobMethodsImpl
+import org.apache.daffodil.runtime1.api.InfosetOutputter
 
-/**
- * Defines the interface for InfosetOutputters.
- *
- * Note that these functions all throw the generic java.lang.Exception to
- * indicate error. Part of the reason to do this instead of a custom exception
- * (e.g. InfosetOutputterException) is to simplify implementations. If an
- * implementation already throws an exception when there is an error, there is
- * no need to catch it and wrap it in a Daffodil specific exception. This is
- * especially true considering Daffodil will just unwrap the exception and
- * convert it to a SDE. Additionally, because Scala does not have checked
- * exceptions, it can be difficult to ensure all expected exceptions are caught
- * by implementations. This does mean some exceptions that you might normally
- * expect to bubble up and will not, and will instead be turned into an SDE.
- */
-trait InfosetOutputter {
+abstract class InfosetOutputterImpl() extends BlobMethodsImpl with InfosetOutputter {
 
-  import Status._
+  import org.apache.daffodil.runtime1.api.Status._
 
-  def status: Status = READY
+  private def status: Status = READY
 
-  /**
-   * Reset the internal state of this InfosetOutputter. This should be called
-   * inbetween calls to the parse method.
-   */
-  def reset(): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of the infoset.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   */
-  @throws[Exception]
-  def startDocument(): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of the infoset.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   */
-  @throws[Exception]
-  def endDocument(): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of a simple element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diSimple the simple element that is started. Various fields of
-   *                 DISimple can be accessed to determine things like the
-   *                 value, nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def startSimple(diSimple: DISimple): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of a simple element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diSimple the simple element that is ended. Various fields of
-   *                 DISimple can be accessed to determine things like the
-   *                 value, nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def endSimple(diSimple: DISimple): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of a complex element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the complex element that is started. Various fields of
-   *                  DIComplex can be accessed to determine things like the
-   *                  nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def startComplex(diComplex: DIComplex): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of a complex element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the complex element that is ended. Various fields of
-   *                  DIComplex can be accessed to determine things like the
-   *                  nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def endComplex(diComplex: DIComplex): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of an array of elements.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the array that is started. Various fields of
-   *                  DIArray can be accessed to determine things like the
-   *                  name, namespace, etc.
-   */
-  @throws[Exception]
-  def startArray(diArray: DIArray): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of an array of elements.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the array that is ended. Various fields of
-   *                  DIArray can be accessed to determine things like the
-   *                  name, namespace, etc.
-   */
-  @throws[Exception]
-  def endArray(diArray: DIArray): Unit
-
-  def getStatus(): Status = {
+  override def getStatus(): Status = {
     // Done, Ready (Not started), Visiting (part way done - can retry to visit more)...
     status
   }
@@ -144,7 +36,6 @@ trait InfosetOutputter {
    * account whether or not the nilled state has been set yet.
    *
    * @param diElement the element to check the nilled state of
-   *
    * @return true if the nilled state has been set and is true. false if the
    *         nilled state is false or if the nilled state has not been set yet
    *         (e.g. during debugging)
@@ -153,40 +44,6 @@ trait InfosetOutputter {
     val maybeIsNilled = diElement.maybeIsNilled
     maybeIsNilled.isDefined && maybeIsNilled.get == true
   }
-
-  /**
-   * Set the attributes for how to create blob files.
-   *
-   * @param dir the Path the the directory to create files. If the directory
-   *            does not exist, Daffodil will attempt to create it before
-   *            writing a blob.
-   * @param prefix the prefix string to be used in generating a blob file name
-   * @param suffix the suffix string to be used in generating a blob file name
-   */
-  final def setBlobAttributes(dir: Path, prefix: String, suffix: String): Unit = {
-    blobDirectory = dir
-    blobPrefix = prefix
-    blobSuffix = suffix
-  }
-
-  /**
-   * Get the list of blob paths that were output in the infoset.
-   *
-   * This is the same as what would be found by iterating over the infoset.
-   */
-  final def getBlobPaths(): Seq[Path] = blobPaths
-
-  final def getBlobDirectory(): Path = blobDirectory
-  final def getBlobPrefix(): String = blobPrefix
-  final def getBlobSuffix(): String = blobSuffix
-  final def setBlobPaths(paths: Seq[Path]): Unit = blobPaths = paths
-  private var blobDirectory: Path = Paths.get(System.getProperty("java.io.tmpdir"))
-  private var blobPrefix: String = "daffodil-"
-  private var blobSuffix: String = ".blob"
-  private var blobPaths: Seq[Path] = Seq.empty
 }
 
-object Status extends Enumeration {
-  type Status = Value
-  val DONE, READY, VISITING = Value
-}
+

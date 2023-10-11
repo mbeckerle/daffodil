@@ -17,10 +17,9 @@
 
 package org.apache.daffodil.runtime1.processors
 
-import java.lang.{ Double => JDouble, Float => JFloat }
+import java.lang.{Double => JDouble, Float => JFloat}
 import scala.util.matching.Regex
 import scala.xml.NamespaceBinding
-
 import org.apache.daffodil.lib.Implicits.ImplicitsSuppressUnusedImportWarning
 import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.exceptions.HasSchemaFileLocation
@@ -41,6 +40,14 @@ import org.apache.daffodil.lib.xml.QNameBase
 import org.apache.daffodil.lib.xml.RefQName
 import org.apache.daffodil.lib.xml.StepQName
 import org.apache.daffodil.lib.xml.XMLUtils
+import org.apache.daffodil.runtime1.api.ChoiceMetadata
+import org.apache.daffodil.runtime1.api.ComplexElementMetadata
+import org.apache.daffodil.runtime1.api.ElementMetadata
+import org.apache.daffodil.runtime1.api.Metadata
+import org.apache.daffodil.runtime1.api.ModelGroupMetadata
+import org.apache.daffodil.runtime1.api.SequenceMetadata
+import org.apache.daffodil.runtime1.api.SimpleElementMetadata
+import org.apache.daffodil.runtime1.api.TermMetadata
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 import org.apache.daffodil.runtime1.dpath.NodeInfo.PrimType
 import org.apache.daffodil.runtime1.dsom.CompiledExpression
@@ -74,18 +81,13 @@ import org.apache.daffodil.runtime1.processors.unparsers.UnparseError
  */
 
 sealed trait RuntimeData
-  extends ImplementsThrowsSDE
+  extends Metadata
+  with ImplementsThrowsSDE
   with HasSchemaFileLocation
   with Serializable {
-  def schemaFileLocation: SchemaFileLocation
-  def diagnosticDebugName: String
-  def path: String
 
   def variableMap: VariableMap
-  override def toString = diagnosticDebugName
-
   def unqualifiedPathStepPolicy: UnqualifiedPathStepPolicy
-
   def namespaces: NamespaceBinding
 }
 
@@ -139,7 +141,8 @@ sealed abstract class TermRuntimeData(
   val fillByteEv: FillByteEv,
   val maybeCheckByteAndBitOrderEv: Maybe[CheckByteAndBitOrderEv],
   val maybeCheckBitOrderAndCharsetEv: Maybe[CheckBitOrderAndCharsetEv],
-) extends RuntimeData {
+) extends RuntimeData
+with TermMetadata {
 
   /**
    * Cyclic structures require initialization
@@ -163,7 +166,6 @@ sealed abstract class TermRuntimeData(
   }
 
   def isRequiredScalar: Boolean
-  def isArray: Boolean
 
   /**
    * At some point TermRuntimeData is a ResolvesQNames which requires tunables:
@@ -665,11 +667,16 @@ sealed class ElementRuntimeData(
     fillByteEvArg,
     maybeCheckByteAndBitOrderEvArg,
     maybeCheckBitOrderAndCharsetEvArg,
-  ) {
+  )
+  with ElementMetadata
+  with SimpleElementMetadata
+  with ComplexElementMetadata {
 
   override def isRequiredScalar = !isArray && isRequiredInUnparseInfoset
 
   final def childERDs = children
+
+  final override def childMetadata: Seq[ElementRuntimeData] = childERDs
 
   def isSimpleType = optPrimType.isDefined
 
@@ -689,6 +696,10 @@ sealed class ElementRuntimeData(
       name
     }
   }
+
+  override def namespace: NS = dpathElementCompileInfo.namedQName.namespace
+  override def optNamespacePrefix: Option[String] = dpathElementCompileInfo.namedQName.prefix
+  override def sscd: String = dpathElementCompileInfo.sscd
 }
 
 /**
@@ -871,7 +882,8 @@ sealed abstract class ModelGroupRuntimeData(
     fillByteEvArg,
     maybeCheckByteAndBitOrderEvArg,
     maybeCheckBitOrderAndCharsetEvArg,
-  ) {
+  )
+  with ModelGroupMetadata {
 
   final override def isRequiredScalar = true
   final override def isArray = false
@@ -922,6 +934,7 @@ final class SequenceRuntimeData(
     maybeCheckByteAndBitOrderEvArg,
     maybeCheckBitOrderAndCharsetEvArg,
   )
+  with SequenceMetadata
 
 /*
  * These Delay-type args are part of how we
@@ -966,7 +979,7 @@ final class ChoiceRuntimeData(
     fillByteEvArg,
     maybeCheckByteAndBitOrderEvArg,
     maybeCheckBitOrderAndCharsetEvArg,
-  )
+  ) with ChoiceMetadata
 
 final class VariableRuntimeData(
   schemaFileLocationArg: SchemaFileLocation,

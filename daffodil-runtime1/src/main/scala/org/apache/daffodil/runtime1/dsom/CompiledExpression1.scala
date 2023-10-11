@@ -261,12 +261,12 @@ class DPathCompileInfo(
     parentsField.setAccessible(false)
   }
 
-  def diagnosticDebugName = path
+  def diagnosticDebugName: String = path
 
   @throws(classOf[java.io.IOException])
   final private def writeObject(out: java.io.ObjectOutputStream): Unit = serializeObject(out)
 
-  override def toString = "DPathCompileInfo(%s)".format(path)
+  override def toString: String = "DPathCompileInfo(%s)".format(path)
 
   /**
    * The contract here supports the semantics of ".." in paths.
@@ -585,4 +585,5 @@ class DPathElementCompileInfo(
       matches.map(_.schemaFileLocation.locationDescription).mkString("- ", "\n- ", ""),
     )
   }
+
 }

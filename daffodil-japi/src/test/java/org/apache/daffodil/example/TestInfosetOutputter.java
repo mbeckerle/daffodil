@@ -17,17 +17,14 @@
 
 package org.apache.daffodil.example;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
-import org.apache.daffodil.japi.infoset.InfosetOutputter;
-
-// TODO: Shouldn't need to import things not in the japi package
-import org.apache.daffodil.runtime1.infoset.DIArray;
-import org.apache.daffodil.runtime1.infoset.DIComplex;
-import org.apache.daffodil.runtime1.infoset.DISimple;
+import org.apache.daffodil.runtime1.api.*;
+import scala.Enumeration;
 
 
-public class TestInfosetOutputter extends InfosetOutputter {
+public class TestInfosetOutputter extends BlobMethodsImpl implements InfosetOutputter {
 
     public ArrayList<TestInfosetEvent> events;
 
@@ -51,45 +48,50 @@ public class TestInfosetOutputter extends InfosetOutputter {
     }
 
     @Override
-    public void startSimple(DISimple diSimple) {
+    public void startSimple(InfosetSimpleElement diSimple) {
         events.add(
             TestInfosetEvent.startSimple(
-                diSimple.erd().name(),
-                diSimple.erd().namedQName().namespace().toString(),
+                diSimple.name(),
+                diSimple.namespace().toString(),
                 diSimple.dataValueAsString(),
-                diSimple.erd().isNillable() ? diSimple.isNilled() : null));
+                diSimple.metadata().isNillable() ? diSimple.isNilled() : null));
     }
 
     @Override
-    public void endSimple(DISimple diSimple) {
+    public void endSimple(InfosetSimpleElement diSimple) {
         events.add(
             TestInfosetEvent.endSimple(
-                diSimple.erd().name(),
-                diSimple.erd().namedQName().namespace().toString()));
+                diSimple.name(),
+                diSimple.namespace().toString()));
     }
 
     @Override
-    public void startComplex(DIComplex diComplex) {
+    public void startComplex(InfosetComplexElement diComplex) {
         events.add(
             TestInfosetEvent.startComplex(
-                diComplex.erd().name(),
-                diComplex.erd().namedQName().namespace().toString(),
-                diComplex.erd().isNillable() ? diComplex.isNilled() : null));
+                diComplex.name(),
+                diComplex.namespace().toString(),
+                diComplex.metadata().isNillable() ? diComplex.isNilled() : null));
     }
 
     @Override
-    public void endComplex(DIComplex diComplex) {
+    public void endComplex(InfosetComplexElement diComplex) {
         events.add(
             TestInfosetEvent.endComplex(
-                diComplex.erd().name(),
-                diComplex.erd().namedQName().namespace().toString()));
+                diComplex.name(),
+                diComplex.namespace().toString()));
     }
 
     @Override
-    public void startArray(DIArray diArray) {
+    public void startArray(InfosetArray diArray) {
     }
 
     @Override
-    public void endArray(DIArray diArray) {
+    public void endArray(InfosetArray diArray) {
+    }
+
+    @Override
+    public Enumeration.Value getStatus() {
+        return null;
     }
 }

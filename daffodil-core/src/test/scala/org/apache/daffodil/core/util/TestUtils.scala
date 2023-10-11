@@ -40,13 +40,13 @@ import org.apache.daffodil.lib.xml._
 import org.apache.daffodil.runtime1.api.DFDL
 import org.apache.daffodil.runtime1.debugger._
 import org.apache.daffodil.runtime1.infoset.InfosetInputter
-import org.apache.daffodil.runtime1.infoset.InfosetOutputter
 import org.apache.daffodil.runtime1.infoset.ScalaXMLInfosetInputter
 import org.apache.daffodil.runtime1.infoset.ScalaXMLInfosetOutputter
 import org.apache.daffodil.runtime1.processors.DataProcessor
 import org.apache.daffodil.runtime1.processors.VariableMap
 
 import org.apache.commons.io.output.NullOutputStream
+import org.apache.daffodil.runtime1.api.InfosetOutputter
 import org.junit.Assert.assertEquals
 
 object INoWarnU2 { ImplicitsSuppressUnusedImportWarning() }

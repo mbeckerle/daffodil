@@ -131,9 +131,9 @@ class TestInfoset1 {
     val list_erd = infoset.erd
     assertEquals(list_erd, infoset.runtimeData)
     val Seq(w_erd) = list_erd.childERDs
-    val wItem = infoset.getChild(w_erd, tunable).asInstanceOf[InfosetSimpleElement]
+    val wItem = infoset.getChild(w_erd, tunable).asSimple
     assertEquals(infoset, wItem.parent)
-    assertEquals(4, wItem.dataValue.getAnyRef)
+    assertEquals(4, wItem.getAnyRef)
 
   }
 
@@ -160,10 +160,10 @@ class TestInfoset1 {
     val list_erd = infoset.erd
     val Seq(w_erd, _, _, c_erd) = list_erd.childERDs
     assertEquals(list_erd, infoset.runtimeData)
-    val wItem = infoset.asComplex.getChild(w_erd, tunable).asInstanceOf[InfosetSimpleElement]
-    assertEquals(4, wItem.dataValue.getAnyRef)
-    val cItem = infoset.asComplex.getChild(c_erd, tunable).asInstanceOf[InfosetSimpleElement]
-    assertEquals(7, cItem.dataValue.getAnyRef)
+    val wItem = infoset.asComplex.getChild(w_erd, tunable).asSimple
+    assertEquals(4, wItem.getAnyRef)
+    val cItem = infoset.asComplex.getChild(c_erd, tunable).asSimple
+    assertEquals(7, cItem.getAnyRef)
     assertEquals(infoset, cItem.parent)
   }
 
@@ -185,13 +185,13 @@ class TestInfoset1 {
     infoset.getChildArray(w_erd, tunable) match {
       case arr: DIArray => {
         assertEquals(2, arr.length)
-        var a = arr(1).asInstanceOf[InfosetSimpleElement]
+        var a = arr.getOccurrence(1).asSimple
         assertEquals(w_erd, a.runtimeData)
 
-        assertEquals(4, a.dataValue.getAnyRef)
+        assertEquals(4, a.getAnyRef)
         assertEquals(infoset, a.parent)
-        a = arr(2).asInstanceOf[InfosetSimpleElement] // 1-based
-        assertEquals(5, a.dataValue.getAnyRef)
+        a = arr.getOccurrence(2).asSimple // 1-based
+        assertEquals(5, a.getAnyRef)
         assertEquals(infoset, a.parent)
       }
     }
@@ -221,18 +221,19 @@ class TestInfoset1 {
     val Seq(w_erd, _, _, c_erd) = list_erd.childERDs
     infoset.getChildArray(w_erd, tunable) match {
       case arr: DIArray => {
-        var a = arr(1).asInstanceOf[InfosetSimpleElement]
+        var a = arr.getOccurrence(1).asSimple
         assertEquals(2, arr.length)
         assertEquals(w_erd, a.runtimeData)
-        assertEquals(4, a.dataValue.getAnyRef)
+        assertEquals(4, a.getAnyRef)
         assertEquals(infoset, a.parent)
-        a = arr(2).asInstanceOf[InfosetSimpleElement] // 1-based
-        assertEquals(5, a.dataValue.getAnyRef)
+        a = arr.getOccurrence(2).asSimple
+        assertEquals(5, a.getAnyRef)
         assertEquals(infoset, a.parent)
       }
     }
     infoset.getChild(c_erd, tunable) match {
-      case s: DISimple => assertEquals(7, s.dataValue.getAnyRef)
+      case s: DISimple => assertEquals(7, s.getAnyRef)
+      case _ => fail("children should be DISimple")
     }
   }
 
@@ -261,7 +262,7 @@ class TestInfoset1 {
     xchild match {
       case arr: DIArray => {
         assertEquals(1, arr.length)
-        val xa = arr(1)
+        val xa = arr.getOccurrence(1)
         assertEquals(x_erd, xa.runtimeData)
         assertTrue(xa.isNilled)
       }
@@ -338,13 +339,14 @@ class TestInfoset1 {
     infoset.getChildArray(x_erd, tunable) match {
       case arr: DIArray => {
         assertEquals(2, arr.length)
-        var xa = arr(1).asInstanceOf[InfosetComplexElement]
+        var xa = arr.getOccurrence(1).asComplex
         assertEquals(x_erd, xa.runtimeData)
         assertTrue(xa.isNilled)
-        xa = arr(2).asInstanceOf[InfosetComplexElement] // 1-based
+        xa = arr.getOccurrence(2).asComplex // 1-based
         val c = xa.getChild(c_erd, tunable)
         c match {
-          case c: DISimple => assertEquals(7, c.dataValue.getAnyRef)
+          case c: DISimple => assertEquals(7, c.getAnyRef)
+          case _ => fail("should be DISimple")
         }
       }
     }
@@ -390,16 +392,18 @@ class TestInfoset1 {
     infoset.getChildArray(x_erd, tunable) match {
       case arr: DIArray => {
         assertEquals(2, arr.length)
-        var xa = arr(1).asInstanceOf[InfosetComplexElement]
+        var xa = arr.getOccurrence(1).asComplex
         assertEquals(x_erd, xa.runtimeData)
         val c = xa.getChild(c_erd, tunable)
         c match {
-          case c: DISimple => assertEquals(7, c.dataValue.getAnyRef)
+          case c: DISimple => assertEquals(7, c.getAnyRef)
+          case _ => fail("should be DISimple")
         }
-        xa = arr(2).asInstanceOf[InfosetComplexElement]
+        xa = arr.getOccurrence(2).asComplex
         val b = xa.getChild(b_erd, tunable)
         b match {
-          case c: DISimple => assertEquals(8, c.dataValue.getAnyRef)
+          case c: DISimple => assertEquals(8, c.getAnyRef)
+          case _ => fail("should be DISimple")
         }
       }
     }

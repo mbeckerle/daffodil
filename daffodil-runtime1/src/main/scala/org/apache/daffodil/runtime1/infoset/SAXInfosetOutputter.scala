@@ -18,11 +18,12 @@
 package org.apache.daffodil.runtime1.infoset
 
 import scala.xml.NamespaceBinding
-
 import org.apache.daffodil.lib.xml.XMLUtils
 import org.apache.daffodil.runtime1.api.DFDL
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-
 import org.xml.sax.ContentHandler
 import org.xml.sax.helpers.AttributesImpl
 
@@ -30,8 +31,8 @@ class SAXInfosetOutputter(
   xmlReader: DFDL.DaffodilParseXMLReader,
   val namespacesFeature: Boolean,
   val namespacePrefixesFeature: Boolean,
-) extends InfosetOutputter
-  with XMLInfosetOutputter {
+) extends InfosetOutputterImpl
+  with XMLInfosetOutputterMixin {
 
   /**
    * Reset the internal state of this InfosetOutputter. This should be called
@@ -58,7 +59,8 @@ class SAXInfosetOutputter(
     }
   }
 
-  override def startSimple(diSimple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
     val contentHandler = xmlReader.getContentHandler
     if (contentHandler != null) {
       doStartElement(diSimple, contentHandler)
@@ -75,30 +77,33 @@ class SAXInfosetOutputter(
     }
   }
 
-  override def endSimple(diSimple: DISimple): Unit = {
+  override def endSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
     val contentHandler = xmlReader.getContentHandler
     if (contentHandler != null) {
       doEndElement(diSimple, contentHandler)
     }
   }
 
-  override def startComplex(diComplex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     val contentHandler = xmlReader.getContentHandler
     if (contentHandler != null) {
       doStartElement(diComplex, contentHandler)
     }
   }
 
-  override def endComplex(diComplex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     val contentHandler = xmlReader.getContentHandler
     if (contentHandler != null) {
       doEndElement(diComplex, contentHandler)
     }
   }
 
-  override def startArray(diArray: DIArray): Unit = {} // not applicable
+  override def startArray(ar: InfosetArray): Unit = {} // not applicable
 
-  override def endArray(diArray: DIArray): Unit = {} // not applicable
+  override def endArray(ar: InfosetArray): Unit = {} // not applicable
 
   private def doStartPrefixMapping(diElem: DIElement, contentHandler: ContentHandler): Unit = {
     val (nsbStart: NamespaceBinding, nsbEnd: NamespaceBinding) = getNsbStartAndEnd(diElem)

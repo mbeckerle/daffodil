@@ -20,9 +20,11 @@ package org.apache.daffodil.runtime1.infoset
 import java.io.StringReader
 import java.nio.charset.StandardCharsets
 import javax.xml.stream.XMLStreamConstants._
-
 import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.util.Indentable
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 
 /**
@@ -40,9 +42,9 @@ class XMLTextInfosetOutputter private (
   pretty: Boolean,
   xmlTextEscapeStyle: XMLTextEscapeStyle.Value,
   minimal: Boolean,
-) extends InfosetOutputter
+) extends InfosetOutputterImpl
   with Indentable
-  with XMLInfosetOutputter {
+  with XMLInfosetOutputterMixin {
 
   def this(
     os: java.io.OutputStream,
@@ -171,7 +173,8 @@ class XMLTextInfosetOutputter private (
     }
   }
 
-  override def startSimple(simple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val simple = se.asInstanceOf[DISimple]
     if (pretty) {
       writer.write(System.lineSeparator())
       outputIndentation(writer)
@@ -209,11 +212,12 @@ class XMLTextInfosetOutputter private (
     inScopeComplexElementHasChildren = true
   }
 
-  override def endSimple(simple: DISimple): Unit = {
+  override def endSimple(simple: InfosetSimpleElement): Unit = {
     // do nothing, everything is done in startSimple
   }
 
-  override def startComplex(complex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val complex = ce.asInstanceOf[DIComplex]
     if (pretty) {
       writer.write(System.lineSeparator())
       outputIndentation(writer)
@@ -223,7 +227,8 @@ class XMLTextInfosetOutputter private (
     inScopeComplexElementHasChildren = false
   }
 
-  override def endComplex(complex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val complex = ce.asInstanceOf[DIComplex]
     decrementIndentation()
     if (pretty && inScopeComplexElementHasChildren) {
       // only output newline and indentation for non-empty complex types
@@ -234,11 +239,11 @@ class XMLTextInfosetOutputter private (
     inScopeComplexElementHasChildren = true
   }
 
-  override def startArray(array: DIArray): Unit = {
+  override def startArray(array: InfosetArray): Unit = {
     // do nothing
   }
 
-  override def endArray(array: DIArray): Unit = {
+  override def endArray(array: InfosetArray): Unit = {
     // do nothing
   }
 

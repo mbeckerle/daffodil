@@ -19,7 +19,6 @@ package org.apache.daffodil.runtime1.processors
 
 import java.nio.CharBuffer
 import java.nio.LongBuffer
-
 import org.apache.daffodil.io.DataStreamCommon
 import org.apache.daffodil.io.FormatInfo
 import org.apache.daffodil.io.LocalBufferMixin
@@ -48,6 +47,7 @@ import org.apache.daffodil.lib.util.Maybe.One
 import org.apache.daffodil.lib.util.MaybeInt
 import org.apache.daffodil.lib.util.MaybeULong
 import org.apache.daffodil.runtime1.api.DFDL
+import org.apache.daffodil.runtime1.api.InfosetElement
 import org.apache.daffodil.runtime1.dpath.DState
 import org.apache.daffodil.runtime1.dsom.DPathCompileInfo
 import org.apache.daffodil.runtime1.dsom.RuntimeSchemaDefinitionError
@@ -526,7 +526,7 @@ abstract class ParseOrUnparseState protected (
 
   final def getContext(): ElementRuntimeData = {
     // threadCheck()
-    val currentElement = infoset.asInstanceOf[InfosetElement]
+    val currentElement = infoset
     val res = currentElement.runtimeData
     res
   }

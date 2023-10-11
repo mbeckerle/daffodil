@@ -29,10 +29,8 @@ import org.apache.daffodil.runtime1.debugger.{ InteractiveDebugger => SInteracti
 import org.apache.daffodil.runtime1.debugger.{
   InteractiveDebuggerRunner => SInteractiveDebuggerRunner,
 }
-import org.apache.daffodil.runtime1.infoset.{ XMLTextEscapeStyle => SXMLTextEscapeStyle }
 import org.apache.daffodil.sapi._
 import org.apache.daffodil.sapi.debugger._
-import org.apache.daffodil.sapi.infoset._
 
 private[sapi] object ValidationConversions {
 
@@ -54,17 +52,6 @@ private[sapi] object ValidationConversions {
       case SValidationMode.Custom(v) => ValidationMode.Custom(v)
     }
     mode
-  }
-}
-
-private[sapi] object XMLTextEscapeStyleConversions {
-
-  def styleToScala(style: XMLTextEscapeStyle.Value): SXMLTextEscapeStyle.Value = {
-    val sxmlTextEscapeStyle: SXMLTextEscapeStyle.Value = style match {
-      case XMLTextEscapeStyle.Standard => SXMLTextEscapeStyle.Standard
-      case XMLTextEscapeStyle.CDATA => SXMLTextEscapeStyle.CDATA
-    }
-    sxmlTextEscapeStyle
   }
 }
 

@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import javax.xml.XMLConstants
-
 import org.apache.daffodil.lib.exceptions.UsageException
 import org.apache.daffodil.sapi.Daffodil
 import org.apache.daffodil.sapi.DaffodilParseXMLReader
@@ -42,11 +41,10 @@ import org.apache.daffodil.sapi.SAXErrorHandlerForSAPITest
 import org.apache.daffodil.sapi.ValidationMode
 import org.apache.daffodil.sapi.infoset.ScalaXMLInfosetInputter
 import org.apache.daffodil.sapi.infoset.ScalaXMLInfosetOutputter
-import org.apache.daffodil.sapi.infoset.XMLTextEscapeStyle
 import org.apache.daffodil.sapi.infoset.XMLTextInfosetOutputter
 import org.apache.daffodil.sapi.io.InputSourceDataInputStream
-
 import org.apache.commons.io.FileUtils
+import org.apache.daffodil.runtime1.infoset.XMLTextEscapeStyle
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

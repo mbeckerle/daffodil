@@ -18,18 +18,19 @@
 package org.apache.daffodil.runtime1.infoset
 
 import javax.xml.parsers.DocumentBuilderFactory
-
 import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.util.MStackOf
 import org.apache.daffodil.lib.util.Maybe
 import org.apache.daffodil.lib.xml.XMLUtils
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node;
 
-class W3CDOMInfosetOutputter extends InfosetOutputter with XMLInfosetOutputter {
+class W3CDOMInfosetOutputter extends InfosetOutputterImpl with XMLInfosetOutputterMixin {
 
   private var document: Document = null
   private val stack = new MStackOf[Node]
@@ -56,7 +57,8 @@ class W3CDOMInfosetOutputter extends InfosetOutputter with XMLInfosetOutputter {
     result = Maybe(root.asInstanceOf[Document])
   }
 
-  def startSimple(diSimple: DISimple): Unit = {
+  override def startSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]
 
     val elem = createElement(diSimple)
 
@@ -73,21 +75,25 @@ class W3CDOMInfosetOutputter extends InfosetOutputter with XMLInfosetOutputter {
     stack.top.appendChild(elem)
   }
 
-  def endSimple(diSimple: DISimple): Unit = {}
+  override def endSimple(se: InfosetSimpleElement): Unit = {
+    val diSimple = se.asInstanceOf[DISimple]}
 
-  def startComplex(diComplex: DIComplex): Unit = {
+  override def startComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
 
     val elem = createElement(diComplex)
     stack.top.appendChild(elem)
     stack.push(elem)
   }
 
-  def endComplex(diComplex: DIComplex): Unit = {
+  override def endComplex(ce: InfosetComplexElement): Unit = {
+    val diComplex = ce.asInstanceOf[DIComplex]
     stack.pop
   }
 
-  def startArray(diArray: DIArray): Unit = {}
-  def endArray(diArray: DIArray): Unit = {}
+  override def startArray(ar: InfosetArray): Unit = {
+    val diArray = ar.asInstanceOf[DIArray]}
+  def endArray(ar: InfosetArray): Unit = {}
 
   def getResult(): Document = {
     Assert.usage(

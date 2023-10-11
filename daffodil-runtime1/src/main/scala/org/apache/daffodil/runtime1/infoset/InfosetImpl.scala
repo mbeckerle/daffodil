@@ -14,23 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.daffodil.runtime1.infoset
 
-import java.lang.{ Boolean => JBoolean }
-import java.lang.{ Number => JNumber }
-import java.math.{ BigDecimal => JBigDecimal }
-import java.util.HashMap
+import java.lang.{Boolean => JBoolean, Byte => JByte, Double => JDouble, Float => JFloat, Integer => JInt}
+import java.lang.{Long => JLong, Number => JNumber, Short => JShort, String => JString}
+import java.math.{BigDecimal => JBigDecimal, BigInteger => JBigInt}
+import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable.ArrayBuffer
-
 import org.apache.daffodil.io.DataOutputStream
 import org.apache.daffodil.io.DirectOrBufferedDataOutputStream
 import org.apache.daffodil.lib.api.DaffodilTunables
 import org.apache.daffodil.lib.api.Diagnostic
 import org.apache.daffodil.lib.api.ThinDiagnostic
 import org.apache.daffodil.lib.calendar.DFDLCalendar
+import org.apache.daffodil.lib.calendar.DFDLDate
+import org.apache.daffodil.lib.calendar.DFDLDateTime
+import org.apache.daffodil.lib.calendar.DFDLTime
 import org.apache.daffodil.lib.equality.TypeEqual
 import org.apache.daffodil.lib.equality.ViewEqual
 import org.apache.daffodil.lib.exceptions.Assert
@@ -47,6 +48,13 @@ import org.apache.daffodil.lib.util.Numbers
 import org.apache.daffodil.lib.xml.NS
 import org.apache.daffodil.lib.xml.NamedQName
 import org.apache.daffodil.lib.xml.XMLUtils
+import org.apache.daffodil.runtime1.api.ComplexElementMetadata
+import org.apache.daffodil.runtime1.api.InfosetArray
+import org.apache.daffodil.runtime1.api.InfosetComplexElement
+import org.apache.daffodil.runtime1.api.InfosetDocument
+import org.apache.daffodil.runtime1.api.InfosetElement
+import org.apache.daffodil.runtime1.api.InfosetSimpleElement
+import org.apache.daffodil.runtime1.api.SimpleElementMetadata
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 import org.apache.daffodil.runtime1.dsom.DPathCompileInfo
 import org.apache.daffodil.runtime1.dsom.DPathElementCompileInfo
@@ -59,7 +67,6 @@ import org.apache.daffodil.runtime1.processors.ProcessingError
 import org.apache.daffodil.runtime1.processors.SimpleTypeRuntimeData
 import org.apache.daffodil.runtime1.processors.TermRuntimeData
 import org.apache.daffodil.runtime1.processors.parsers.PState
-
 import passera.unsigned.ULong
 
 sealed trait DINode {
@@ -101,6 +108,7 @@ sealed trait DINode {
     }
   }
   def isArray: Boolean
+  // def optArray: Option[DIArray]
 
   def asElement: DIElement =
     if (isSimple) asSimple
@@ -417,7 +425,7 @@ final class FakeDINode extends DISimple(null) {
 
   override def parent = die
   override def diParent = die
-  override def setParent(p: InfosetComplexElement): Unit = die
+  override def setParent(p: DIComplex): Unit = die
 
   override def isNilled: Boolean = die
   override def setNilled(): Unit = die
@@ -435,6 +443,8 @@ final class FakeDINode extends DISimple(null) {
 
   override def contentLength: ContentLengthState = die
   override def valueLength: ValueLengthState = die
+
+  override def primType: NodeInfo.PrimType = die
 }
 
 /**
@@ -999,8 +1009,8 @@ object DISimpleState {
 sealed trait DIElement
   extends DINode
   with DITerm
-  with InfosetElement
-  with DIElementSharedImplMixin {
+  with DIElementSharedImplMixin
+  with InfosetElement {
 
   final override protected def allocContentLength = new ContentLengthState(this)
   final override protected def allocValueLength = new ValueLengthState(this)
@@ -1008,6 +1018,8 @@ sealed trait DIElement
   def isSimple: Boolean
   def isComplex: Boolean
   def isArray: Boolean
+  // def optArray: Option[DIArray]
+
   override final def name: String = erd.name
   override final def namespace: NS = erd.targetNamespace
   override final def namedQName = erd.namedQName
@@ -1079,27 +1091,27 @@ sealed trait DIElement
   protected final var _isHidden = false
   final def isHidden: Boolean = _isHidden
 
-  override def setHidden(): Unit = {
+  def setHidden(): Unit = {
     _isHidden = true
   }
 
   final def runtimeData = erd
-  protected final var _parent: InfosetComplexElement = null
+  protected final var _parent: DIComplex = null
 
   protected final var _isNilledSet: Boolean = false
 
-  override def parent = _parent
+  def parent = _parent
 
   def diParent = _parent.asInstanceOf[DIComplex]
 
-  override def setParent(p: InfosetComplexElement): Unit = {
+  def setParent(p: DIComplex): Unit = {
     Assert.invariant(_parent eq null)
     _parent = p
   }
 
-  private var _array: Maybe[InfosetArray] = Nope
-  override def array = _array
-  override def setArray(a: InfosetArray) = {
+  private var _array: Maybe[DIArray] = Nope
+  def maybeArray: Maybe[DIArray] = _array
+  def setArray(a: DIArray): Unit = {
     _array = One(a)
   }
 
@@ -1123,7 +1135,7 @@ sealed trait DIElement
    */
   def isNilled: Boolean
 
-  override def setNilled(): Unit = {
+  def setNilled(): Unit = {
     Assert.invariant(erd.isNillable)
     Assert.invariant(!_isNilled)
     _isNilled = true
@@ -1135,8 +1147,9 @@ sealed trait DIElement
    * valid = One(true) means valid
    * valid = One(false) means invalid
    */
-  override def valid = _validity
-  override def setValid(validity: Boolean): Unit = { _validity = MaybeBoolean(validity) }
+  def valid: MaybeBoolean = _validity
+  def setValid(validity: Boolean): Unit = { _validity = MaybeBoolean(validity) }
+
 }
 
 // This is not a mutable collection class on purpose.
@@ -1166,6 +1179,7 @@ final class DIArray(
   override def isSimple = false
   override def isComplex = false
   override def isArray = true
+  // override lazy val optArray: Option[DIArray] = Some(this)
 
   override def diParent = parent
 
@@ -1207,7 +1221,7 @@ final class DIArray(
 
   protected final val _contents = new ArrayBuffer[DIElement](initialSize)
 
-  override def children = _contents.toStream.asInstanceOf[Stream[DINode]]
+  override def children: Stream[DINode] = _contents.toStream.asInstanceOf[Stream[DINode]]
 
   /**
    * Used to shorten array when backtracking out of having appended elements.
@@ -1217,6 +1231,7 @@ final class DIArray(
   }
 
   override def contents: IndexedSeq[DINode] = _contents
+  def elementContents: IndexedSeq[DIElement] = _contents
 
   override def maybeLastChild: Maybe[DINode] = {
     val len = _contents.length
@@ -1231,7 +1246,7 @@ final class DIArray(
   /**
    * Note that occursIndex argument starts at position 1.
    */
-  def getOccurrence(occursIndex1b: Long) = {
+  def getOccurrence(occursIndex1b: Long): DIElement = {
     if (occursIndex1b < 1)
       erd.toss(
         new InfosetFatalArrayIndexOutOfBoundsException(this, occursIndex1b, length),
@@ -1243,19 +1258,19 @@ final class DIArray(
     _contents(occursIndex1b.toInt - 1)
   }
 
-  @inline final def apply(occursIndex1b: Long) = getOccurrence(occursIndex1b)
-
-  def append(ie: InfosetElement): Unit = {
+  def append(ie: DIElement): Unit = {
     _contents += ie.asInstanceOf[DIElement]
     ie.setArray(this)
   }
 
-  def concat(array: DIArray) = {
-    val newContents = array.contents
-    newContents.foreach(ie => {
-      ie.asInstanceOf[InfosetElement].setArray(this)
-      append(ie.asInstanceOf[InfosetElement])
-    })
+  def concat(array: DIArray): Unit = {
+    val newContents = array.elementContents
+    newContents.foreach { ie =>
+      {
+        ie.setArray(this)
+        append(ie)
+      }
+    }
   }
 
   final def length: Long = _contents.length
@@ -1296,9 +1311,14 @@ sealed class DISimple(override val erd: ElementRuntimeData)
   with DISimpleSharedImplMixin
   with InfosetSimpleElement {
 
+  override def metadata: SimpleElementMetadata = erd
+
   final override def isSimple = true
   final override def isComplex = false
   final override def isArray = false
+  // final override def optArray: Option[DIArray] = None
+
+  def primType: NodeInfo.PrimType = erd.optPrimType.orNull
 
   def contents: IndexedSeq[DINode] = IndexedSeq.empty
 
@@ -1324,7 +1344,7 @@ sealed class DISimple(override val erd: ElementRuntimeData)
    * Parsing of a text number first does setDataValue to a string, then a conversion does overwrite data value
    * with a number. Unparsing does setDataValue to a value, then overwriteDataValue to a string.
    */
-  override def setDataValue(x: DataValuePrimitiveNullable): Unit = {
+  def setDataValue(x: DataValuePrimitiveNullable): Unit = {
     Assert.invariant(!hasValue)
     overwriteDataValue(x)
   }
@@ -1451,7 +1471,7 @@ sealed class DISimple(override val erd: ElementRuntimeData)
    * Obtain the data value. Implements default
    * values, and outputValueCalc for unparsing.
    */
-  override def dataValue: DataValuePrimitiveNullable = {
+  def dataValue: DataValuePrimitiveNullable = {
     if (_value.isEmpty)
       if (erd.optDefaultValue.isDefined) {
         val defaultVal = erd.optDefaultValue
@@ -1558,6 +1578,29 @@ sealed class DISimple(override val erd: ElementRuntimeData)
     Assert.invariantFailed("Should not try to remove a child of a simple type")
   }
 
+  // call to getAnyRef here seems redundant
+  // but tests fail that compare objects if this call isn't here
+  // Boxing/Unboxing related perhaps
+  @inline private def v = dataValue.getAnyRef
+
+  override def getAnyRef: AnyRef = v.asInstanceOf[AnyRef]
+  override def getBigDecimal: JBigDecimal = v.asInstanceOf[JBigDecimal]
+  override def getCalendar: DFDLCalendar = v.asInstanceOf[DFDLCalendar]
+  override def getDate: DFDLDate = v.asInstanceOf[DFDLDate]
+  override def getTime: DFDLTime = v.asInstanceOf[DFDLTime]
+  override def getDateTime: DFDLDateTime = v.asInstanceOf[DFDLDateTime]
+  override def getByteArray: Array[Byte] = v.asInstanceOf[Array[Byte]]
+  override def getBoolean: JBoolean = v.asInstanceOf[JBoolean]
+  override def getNumber: JNumber = v.asInstanceOf[JNumber]
+  override def getByte: JByte = v.asInstanceOf[JByte]
+  override def getShort: JShort = v.asInstanceOf[JShort]
+  override def getInt: JInt = v.asInstanceOf[JInt]
+  override def getLong: JLong = v.asInstanceOf[JLong]
+  override def getDouble: JDouble = v.asInstanceOf[JDouble]
+  override def getFloat: JFloat = v.asInstanceOf[JFloat]
+  override def getBigInt: JBigInt = v.asInstanceOf[JBigInt]
+  override def getString: JString = v.asInstanceOf[JString]
+  override def getURI: URI = v.asInstanceOf[URI]
 }
 
 /**
@@ -1575,9 +1618,12 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
   with DIComplexSharedImplMixin
   with InfosetComplexElement { diComplex =>
 
+  override def metadata: ComplexElementMetadata = erd
+
   final override def isSimple = false
   final override def isComplex = true
   final override def isArray = false
+  // final override def optArray: Option[DIArray] = None
 
   final override def isDefaulted: Boolean = {
     val res =
@@ -1613,9 +1659,9 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
   }
 
   val childNodes = new ArrayBuffer[DINode]
-  //
-  // TODO: Cleanup - Change below to use NonAllocatingMap to improve code style.
-  lazy val nameToChildNodeLookup = new HashMap[NamedQName, ArrayBuffer[DINode]]
+
+  private lazy val nameToChildNodeLookup =
+    new java.util.HashMap[NamedQName, ArrayBuffer[DINode]]
 
   override lazy val contents: IndexedSeq[DINode] = childNodes
 
@@ -1631,11 +1677,11 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
     } else Nope
   }
 
-  final def getChild(erd: ElementRuntimeData, tunable: DaffodilTunables): InfosetElement = {
+  final def getChild(erd: ElementRuntimeData, tunable: DaffodilTunables): DIElement = {
     getChild(erd.dpathElementCompileInfo.namedQName, tunable)
   }
 
-  private def noQuerySupportCheck(nodes: Seq[DINode], nqn: NamedQName) = {
+  private def noQuerySupportCheck(nodes: Seq[DINode], nqn: NamedQName): Unit = {
     if (nodes.length > 1) {
       // might be more than one result
       // but we have to rule out there being an empty DIArray
@@ -1650,10 +1696,10 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
     }
   }
 
-  final def getChild(nqn: NamedQName, tunable: DaffodilTunables): InfosetElement = {
+  final def getChild(nqn: NamedQName, tunable: DaffodilTunables): DIElement = {
     val maybeNode = findChild(nqn, tunable)
     if (maybeNode.isDefined)
-      maybeNode.get.asInstanceOf[InfosetElement]
+      maybeNode.get.asElement
     else
       erd.toss(new InfosetNoSuchChildElementException(this, nqn))
   }
@@ -1661,16 +1707,16 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
   final def getChildArray(
     childERD: ElementRuntimeData,
     tunable: DaffodilTunables,
-  ): InfosetArray = {
+  ): DIArray = {
     Assert.usage(childERD.isArray)
 
     getChildArray(childERD.dpathElementCompileInfo.namedQName, tunable)
   }
 
-  final def getChildArray(nqn: NamedQName, tunable: DaffodilTunables): InfosetArray = {
+  final def getChildArray(nqn: NamedQName, tunable: DaffodilTunables): DIArray = {
     val maybeNode = findChild(nqn, tunable)
     if (maybeNode.isDefined) {
-      maybeNode.get.asInstanceOf[InfosetArray]
+      maybeNode.get.asArray
     } else {
       erd.toss(new InfosetNoSuchChildElementException(this, nqn))
     }
@@ -1749,11 +1795,17 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
     childNodes ++= unordered.sortBy(_.erd.position)
   }
 
-  override def addChild(e: InfosetElement, tunable: DaffodilTunables): Unit = {
+  /**
+   * Determines slotInParent from the ERD of the infoset element arg.
+   * Hooks up the parent pointer of the new child to reference this.
+   *
+   * When slot contains an array, this appends to the end of the array.
+   */
+  def addChild(e: DIElement, tunable: DaffodilTunables): Unit = {
     if (e.runtimeData.isArray) {
       val childERD = e.runtimeData
       val needsNewArray =
-        if (childNodes.length == 0) {
+        if (childNodes.isEmpty) {
           // This complex element has no children, so we must need to create a
           // new DIArray to add this array element
           true
@@ -1887,7 +1939,6 @@ sealed class DIComplex(override val erd: ElementRuntimeData)
     childNodes.foreach(node => a += node.totalElementCount)
     a
   }
-
 }
 
 /*
@@ -1906,7 +1957,7 @@ final class DIDocument(erd: ElementRuntimeData) extends DIComplex(erd) with Info
 
 object Infoset {
 
-  def newElement(erd: ElementRuntimeData): InfosetElement = {
+  def newElement(erd: ElementRuntimeData): DIElement = {
     if (erd.isSimpleType) new DISimple(erd)
     else new DIComplex(erd)
   }
@@ -1926,7 +1977,7 @@ object Infoset {
   def newDetachedElement(
     state: ParseOrUnparseState,
     erd: ElementRuntimeData,
-  ): InfosetElement = {
+  ): DIElement = {
     val detachedDoc = Infoset.newDocument(erd).asInstanceOf[DIDocument]
     val detachedElem = Infoset.newElement(erd)
     detachedDoc.addChild(detachedElem, state.tunable)

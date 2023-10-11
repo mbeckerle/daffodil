@@ -17,6 +17,21 @@
 
 package org.apache.daffodil.sapi
 
+import org.apache.daffodil.runtime1.api.{InfosetOutputter => SInfosetOutputter}
+import org.apache.daffodil.runtime1.infoset.{ JDOMInfosetOutputter => SJDOMInfosetOutputter }
+import org.apache.daffodil.runtime1.infoset.{ JsonInfosetOutputter => SJsonInfosetOutputter }
+import org.apache.daffodil.runtime1.infoset.{ NullInfosetOutputter => SNullInfosetOutputter }
+
+import org.apache.daffodil.runtime1.infoset.{
+  ScalaXMLInfosetOutputter => SScalaXMLInfosetOutputter,
+}
+import org.apache.daffodil.runtime1.infoset.{
+  W3CDOMInfosetOutputter => SW3CDOMInfosetOutputter,
+}
+
+import org.apache.daffodil.runtime1.infoset.{
+  XMLTextInfosetOutputter => SXMLTextInfosetOutputter,
+}
 /**
  * Defines various classes used control the representation of the infoset for parse and unparse. 
  * Classes that extend [[InfosetOutputter]] are provided to the [[DataProcessor.parse(input:org\.apache\.daffodil* DataProcessor.parse]]
@@ -26,4 +41,21 @@ package org.apache.daffodil.sapi
  * an infoset. A new InfosetOutputter is required for each call to unparse().
  */
 
-package object infoset
+package object infoset {
+
+  // For SAPI these are just aliases
+
+  type InfosetOutputter = SInfosetOutputter
+
+  type ScalaXMLInfosetOutputter = SScalaXMLInfosetOutputter
+
+  type XMLTextInfosetOutputter = SXMLTextInfosetOutputter
+
+  type JsonInfosetOutputter = SJsonInfosetOutputter
+
+  type JDOMInfosetOutputter = SJDOMInfosetOutputter
+
+  type W3CDOMInfosetOutputter = SW3CDOMInfosetOutputter
+
+  type NullInfosetOutputter = SNullInfosetOutputter
+}

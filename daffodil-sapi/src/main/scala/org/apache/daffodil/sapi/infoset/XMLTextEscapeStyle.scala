@@ -28,7 +28,7 @@ package org.apache.daffodil.sapi.infoset
  * contains whitespace or special characters (quotation mark, ampersand, less-than,
  * greater-than)
  */
-object XMLTextEscapeStyle extends Enumeration {
-  type XMLTextEscapeStyle = Value
-  val Standard, CDATA = Value
-}
+//object XMLTextEscapeStyle extends Enumeration {
+//  type XMLTextEscapeStyle = Value
+//  val Standard, CDATA = Value
+//}

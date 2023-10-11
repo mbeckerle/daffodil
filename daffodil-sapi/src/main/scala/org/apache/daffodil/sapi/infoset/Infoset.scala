@@ -20,36 +20,17 @@ package org.apache.daffodil.sapi.infoset
 import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.util.MaybeBoolean
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-import org.apache.daffodil.runtime1.infoset.DIArray
-import org.apache.daffodil.runtime1.infoset.DIComplex
-// TODO: Not sure about the access to internal infoset implementation details.
-// Should API users have this deep access to our internal infoset?
-import org.apache.daffodil.runtime1.infoset.DISimple
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType
 import org.apache.daffodil.runtime1.infoset.{ InfosetInputter => SInfosetInputter }
-import org.apache.daffodil.runtime1.infoset.{ InfosetOutputter => SInfosetOutputter }
 import org.apache.daffodil.runtime1.infoset.{ JDOMInfosetInputter => SJDOMInfosetInputter }
-import org.apache.daffodil.runtime1.infoset.{ JDOMInfosetOutputter => SJDOMInfosetOutputter }
 import org.apache.daffodil.runtime1.infoset.{ JsonInfosetInputter => SJsonInfosetInputter }
-import org.apache.daffodil.runtime1.infoset.{ JsonInfosetOutputter => SJsonInfosetOutputter }
-import org.apache.daffodil.runtime1.infoset.{ NullInfosetOutputter => SNullInfosetOutputter }
 import org.apache.daffodil.runtime1.infoset.{
   ScalaXMLInfosetInputter => SScalaXMLInfosetInputter,
 }
-import org.apache.daffodil.runtime1.infoset.{
-  ScalaXMLInfosetOutputter => SScalaXMLInfosetOutputter,
-}
 import org.apache.daffodil.runtime1.infoset.{ W3CDOMInfosetInputter => SW3CDOMInfosetInputter }
-import org.apache.daffodil.runtime1.infoset.{
-  W3CDOMInfosetOutputter => SW3CDOMInfosetOutputter,
-}
 import org.apache.daffodil.runtime1.infoset.{
   XMLTextInfosetInputter => SXMLTextInfosetInputter,
 }
-import org.apache.daffodil.runtime1.infoset.{
-  XMLTextInfosetOutputter => SXMLTextInfosetOutputter,
-}
-import org.apache.daffodil.sapi.packageprivate._
 
 /**
  * Abstract class used to determine how the infoset representation should be
@@ -120,226 +101,13 @@ abstract class InfosetInputter extends SInfosetInputter {
 }
 
 /**
- * Abstract class used to determine how the infoset representation should be
- * output from a call to [[DataProcessor.parse(input:org\.apache\.daffodil* DataProcessor.parse]]. The Daffodil core will call
- * the various methods of this class in an order appropriate to create an
- * infoset representation.
- *
- * Classes that extend InfosetOutputter are not guaranteed to be thread-safe.
- **/
-abstract class InfosetOutputter extends SInfosetOutputter {
-
-  /**
-   * Reset the internal state of this InfosetOutputter. This should be called
-   * inbetween calls to the parse method.
-   */
-  def reset(): Unit // call to reuse these. When first constructed no reset call is necessary.
-
-  /**
-   * Called by Daffodil internals to signify the beginning of the infoset.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   */
-  @throws[Exception]
-  def startDocument(): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of the infoset.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   */
-  @throws[Exception]
-  def endDocument(): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of a simple element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diSimple the simple element that is started. Various fields of
-   *                 DISimple can be accessed to determine things like the
-   *                 value, nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def startSimple(diSimple: DISimple): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of a simple element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diSimple the simple element that is ended. Various fields of
-   *                 DISimple can be accessed to determine things like the
-   *                 value, nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def endSimple(diSimple: DISimple): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of a complex element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the complex element that is started. Various fields of
-   *                  DIComplex can be accessed to determine things like the
-   *                  nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def startComplex(diComplex: DIComplex): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of a complex element.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diComplex the complex element that is ended. Various fields of
-   *                  DIComplex can be accessed to determine things like the
-   *                  nil, name, namespace, etc.
-   */
-  @throws[Exception]
-  def endComplex(diComplex: DIComplex): Unit
-
-  /**
-   * Called by Daffodil internals to signify the beginning of an array of elements.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diArray the array that is started. Various fields of
-   *                DIArray can be accessed to determine things like the
-   *                name, namespace, etc.
-   */
-  @throws[Exception]
-  def startArray(diArray: DIArray): Unit
-
-  /**
-   * Called by Daffodil internals to signify the end of an array of elements.
-   *
-   * Throws java.lang.Exception if there was an error and Daffodil should stop parsing
-   *
-   * @param diArray the array that is ended. Various fields of
-   *                DIArray can be accessed to determine things like the
-   *                name, namespace, etc.
-   */
-  @throws[Exception]
-  def endArray(diArray: DIArray): Unit
-}
-
-/**
  * The below classes are all just proxies of the classes implemented in the
  * core daffodil code. The reason for this is purely for documentation. When
  * only generate scaladoc on the daffodil-sapi subproject. By having this proxy
  * classes, we can document these classes and have a small and clean scaladoc.
- */
-
-/**
- * [[InfosetOutputter]] to build an infoset represented as a scala.xml.Node
  *
- * @param showFormatInfo add additional properties to each scala.xml.Node for debug purposes
+ * FIXME: Put this back after refactoring is done.
  */
-class ScalaXMLInfosetOutputter(showFormatInfo: Boolean = false) extends InfosetOutputterProxy {
-
-  override val infosetOutputter = new SScalaXMLInfosetOutputter(showFormatInfo)
-
-  /**
-   * Get the scala.xml.Node representing the infoset created during a parse
-   *
-   * This function shuld only be called if ParseResult.isError() returns false
-   */
-  def getResult(): scala.xml.Node = infosetOutputter.getResult()
-}
-
-/**
- * [[InfosetOutputter]] to build an infoset represented as XML written to a java.io.OutputStream
- */
-class XMLTextInfosetOutputter private (outputter: SXMLTextInfosetOutputter)
-  extends InfosetOutputterProxy {
-
-  /**
-   * Output the infoset as XML Text, written to a java.io.OutputStream
-   *
-   * @param os the java.io.OutputStream to write the XML text to
-   * @param pretty enable or disable pretty printing. Pretty printing will only
-   *               insert indentation and newlines where it will not affect the
-   *               content of the XML.
-   * @param xmlTextEscapeStyle determine whether to wrap values of elements of type
-   *                       xs:string in CDATA tags in order to preserve
-   *                       whitespace.
-   */
-  def this(
-    os: java.io.OutputStream,
-    pretty: Boolean,
-    xmlTextEscapeStyle: XMLTextEscapeStyle.Value = XMLTextEscapeStyle.Standard,
-  ) = {
-    this(
-      new SXMLTextInfosetOutputter(
-        os,
-        pretty,
-        XMLTextEscapeStyleConversions.styleToScala(xmlTextEscapeStyle),
-      ),
-    )
-  }
-
-  override val infosetOutputter = outputter
-}
-
-/**
- * [[InfosetOutputter]] to build an infoset represented as JSON written to a java.io.OutputStream
- */
-class JsonInfosetOutputter private (outputter: SJsonInfosetOutputter)
-  extends InfosetOutputterProxy {
-
-  /**
-   * Output the infoset as json text, written to a java.io.OutputStream
-   *
-   * @param os the java.io.OutputStream to write the json text to
-   * @param pretty enable or disable pretty printing. Pretty printing will only
-   *               insert indentation and newlines where it will not affect the
-   *               content of the json.
-   */
-  def this(os: java.io.OutputStream, pretty: Boolean) =
-    this(new SJsonInfosetOutputter(os, pretty))
-
-  override val infosetOutputter = outputter
-}
-
-/**
- * [[InfosetOutputter]] to build an infoset represented as an org.jdom2.Document
- */
-class JDOMInfosetOutputter() extends InfosetOutputterProxy {
-
-  override val infosetOutputter = new SJDOMInfosetOutputter()
-
-  /**
-   * Get the jdom Document representing the infoset created during a parse
-   *
-   * This function shuld only be called if ParseResult.isError() returns false
-   */
-  def getResult(): org.jdom2.Document = infosetOutputter.getResult()
-}
-
-/**
- * [[InfosetOutputter]] to build an infoset represented as an org.w3c.dom.Document
- */
-class W3CDOMInfosetOutputter() extends InfosetOutputterProxy {
-
-  override val infosetOutputter = new SW3CDOMInfosetOutputter()
-
-  /**
-   * Get the w3c Document representing the infoset created during a parse
-   *
-   * This function shuld only be called if ParseResult.isError() returns false
-   */
-  def getResult(): org.w3c.dom.Document = infosetOutputter.getResult()
-}
-
-/**
- * [[InfosetOutputter]] that does not build an infoset represention, ignoring
- * all [[InfosetOutputter]] events
- */
-class NullInfosetOutputter() extends InfosetOutputterProxy {
-
-  override val infosetOutputter = new SNullInfosetOutputter()
-}
 
 /**
  * [[InfosetInputter]] to read an infoset represented as a scala.xml.Node
@@ -442,22 +210,50 @@ abstract class InfosetInputterProxy extends InfosetInputter {
 
 /**
  * A proxy for InfosetOutputters that are internal to Daffodil
+ *
+ * Implements Daffodil's internal runtime1.InfosetOutputter, but
+ * calls a SAPI InfosetOutputter, which has more restricted access
+ * to the infoset nodes.
  */
-abstract class InfosetOutputterProxy extends InfosetOutputter {
+//abstract class InfosetOutputterProxy extends SInfosetOutputter {
+//
+//  /**
+//   * The InfosetOutputter to proxy infoset events to
+//   */
+//  protected val infosetOutputter: SInfosetOutputterImpl
+//
+//  override def reset(): Unit = infosetOutputter.reset()
+//  override def startDocument(): Unit = infosetOutputter.startDocument()
+//  override def endDocument(): Unit = infosetOutputter.endDocument()
+//  override def startSimple(diSimple: DISimple): Unit = infosetOutputter.startSimple(diSimple)
+//  override def endSimple(diSimple: DISimple): Unit = infosetOutputter.endSimple(diSimple)
+//  override def startComplex(diComplex: DIComplex): Unit =
+//    infosetOutputter.startComplex(diComplex)
+//  override def endComplex(diComplex: DIComplex): Unit = infosetOutputter.endComplex(diComplex)
+//  override def startArray(diArray: DIArray): Unit = infosetOutputter.startArray(diArray)
+//  override def endArray(diArray: DIArray): Unit = infosetOutputter.endArray(diArray)
+//}
 
-  /**
-   * The InfosetOutputter to proxy infoset events to
-   */
-  protected val infosetOutputter: SInfosetOutputter
-
-  override def reset(): Unit = infosetOutputter.reset()
-  override def startDocument(): Unit = infosetOutputter.startDocument()
-  override def endDocument(): Unit = infosetOutputter.endDocument()
-  override def startSimple(diSimple: DISimple): Unit = infosetOutputter.startSimple(diSimple)
-  override def endSimple(diSimple: DISimple): Unit = infosetOutputter.endSimple(diSimple)
-  override def startComplex(diComplex: DIComplex): Unit =
-    infosetOutputter.startComplex(diComplex)
-  override def endComplex(diComplex: DIComplex): Unit = infosetOutputter.endComplex(diComplex)
-  override def startArray(diArray: DIArray): Unit = infosetOutputter.startArray(diArray)
-  override def endArray(diArray: DIArray): Unit = infosetOutputter.endArray(diArray)
-}
+//abstract class InfosetOutputterProxy extends InfosetOutputter {
+//
+//  /**
+//   * The InfosetOutputter to proxy infoset events to
+//   */
+//  protected val infosetOutputter: SInfosetOutputter
+//
+//  override def reset(): Unit = infosetOutputter.reset()
+//  override def startDocument(): Unit = infosetOutputter.startDocument()
+//  override def endDocument(): Unit = infosetOutputter.endDocument()
+//  override def startSimple(diSimple: InfosetSimpleElement): Unit =
+//    infosetOutputter.startSimple(diSimple.asInstanceOf[DISimple])
+//  override def endSimple(diSimple: InfosetSimpleElement): Unit =
+//    infosetOutputter.endSimple(diSimple.asInstanceOf[DISimple])
+//  override def startComplex(diComplex: InfosetComplexElement): Unit =
+//    infosetOutputter.startComplex(diComplex.asInstanceOf[DIComplex])
+//  override def endComplex(diComplex: InfosetComplexElement): Unit =
+//    infosetOutputter.endComplex(diComplex.asInstanceOf[DIComplex])
+//  override def startArray(diArray: InfosetArray): Unit =
+//    infosetOutputter.startArray(diArray.asInstanceOf[DIArray])
+//  override def endArray(diArray: InfosetArray): Unit =
+//    infosetOutputter.endArray(diArray.asInstanceOf[DIArray])
+//}

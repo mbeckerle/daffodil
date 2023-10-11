@@ -24,7 +24,6 @@ import org.apache.daffodil.lib.api.WithDiagnostics
 import org.apache.daffodil.lib.api._
 import org.apache.daffodil.lib.externalvars.Binding
 import org.apache.daffodil.runtime1.infoset.InfosetInputter
-import org.apache.daffodil.runtime1.infoset.InfosetOutputter
 import org.apache.daffodil.runtime1.processors.Failure
 import org.apache.daffodil.runtime1.processors.ProcessorResult
 import org.apache.daffodil.runtime1.processors.Success

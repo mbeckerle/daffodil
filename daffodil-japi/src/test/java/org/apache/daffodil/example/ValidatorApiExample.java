@@ -20,9 +20,10 @@ package org.apache.daffodil.example;
 import org.apache.daffodil.example.validation.FailingValidator;
 import org.apache.daffodil.example.validation.PassingValidator;
 import org.apache.daffodil.japi.*;
-import org.apache.daffodil.japi.infoset.JDOMInfosetOutputter;
+
 import org.apache.daffodil.japi.io.InputSourceDataInputStream;
 import org.apache.daffodil.lib.util.Misc;
+import org.apache.daffodil.runtime1.infoset.JDOMInfosetOutputter;
 import org.jdom2.output.XMLOutputter;
 import org.junit.Test;
 
