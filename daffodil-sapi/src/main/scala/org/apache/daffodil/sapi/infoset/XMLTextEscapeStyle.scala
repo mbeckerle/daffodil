@@ -32,3 +32,6 @@ package org.apache.daffodil.sapi.infoset
 //  type XMLTextEscapeStyle = Value
 //  val Standard, CDATA = Value
 //}
+object shutUpWarnings {
+  val foo = 5
+}
