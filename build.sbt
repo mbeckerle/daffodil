@@ -247,7 +247,7 @@ lazy val commonSettings = Seq(
   ),
   licenses := Seq(License.Apache2),
   homepage := Some(url("https://daffodil.apache.org")),
-  releaseNotesURL := Some(url(s"https://daffodil.apache.org/releases/${version.value}/")),
+  // releaseNotesURL := Some(url(s"https://daffodil.apache.org/releases/${version.value}/")),
   unmanagedBase := baseDirectory.value / "lib" / "jars",
   sourceManaged := baseDirectory.value / "src_managed",
   resourceManaged := baseDirectory.value / "resource_managed",

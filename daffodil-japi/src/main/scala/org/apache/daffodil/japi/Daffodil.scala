@@ -100,40 +100,40 @@ object Daffodil {
 
 }
 
-/**
- * Compile DFDL schemas into [[ProcessorFactory]]'s or reload saved parsers into [[DataProcessor]]'s.
- *
- * Do not use the Compiler constructor to create a Compiler. Instead, use [[Daffodil#compiler()]].
- */
+///**
+// * Compile DFDL schemas into [[ProcessorFactory]]'s or reload saved parsers into [[DataProcessor]]'s.
+// *
+// * Do not use the Compiler constructor to create a Compiler. Instead, use [[Daffodil#compiler()]].
+// */
 class Compiler private[japi] (private var sCompiler: SCompiler) {
 
   private def copy(sCompiler: SCompiler = sCompiler) = new Compiler(sCompiler)
 
-  /**
-   * Compile DFDL schema file into a [[ProcessorFactory]]
-   *
-   * To allow jar-file packaging, (where schema files might be part of a jar),
-   * it is recommended to use [[Compiler#compileSource]] instead.
-   *
-   * @param schemaFile DFDL schema file used to create a [[ProcessorFactory]].
-   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
-   * @throws java.io.IOException if an I/O error occurs while reading the schemaFile
-   */
+//  /**
+//   * Compile DFDL schema file into a [[ProcessorFactory]]
+//   *
+//   * To allow jar-file packaging, (where schema files might be part of a jar),
+//   * it is recommended to use [[Compiler#compileSource]] instead.
+//   *
+//   * @param schemaFile DFDL schema file used to create a [[ProcessorFactory]].
+//   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
+//   * @throws java.io.IOException if an I/O error occurs while reading the schemaFile
+//   */
   @throws(classOf[java.io.IOException])
   def compileFile(schemaFile: File): ProcessorFactory = compileFile(schemaFile, null, null)
 
-  /**
-   * Compile DFDL schema file into a [[ProcessorFactory]]
-   *
-   * To allow jar-file packaging, (where schema files might be part of a jar),
-   * it is recommended to use [[Compiler#compileSource]] instead.
-   *
-   * @param schemaFile DFDL schema file used to create a [[ProcessorFactory]].
-   * @param rootName name of root element, or null to choose automatically from first element of schema.
-   * @param rootNamespace String of namespace of the root element, or null to infer automatically when unambiguous. Pass "" (empty string) for No Namespace.*
-   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
-   * @throws java.io.IOException if an I/O error occurs while reading the schemaFile
-   */
+//  /**
+//   * Compile DFDL schema file into a [[ProcessorFactory]]
+//   *
+//   * To allow jar-file packaging, (where schema files might be part of a jar),
+//   * it is recommended to use [[Compiler#compileSource]] instead.
+//   *
+//   * @param schemaFile DFDL schema file used to create a [[ProcessorFactory]].
+//   * @param rootName name of root element, or null to choose automatically from first element of schema.
+//   * @param rootNamespace String of namespace of the root element, or null to infer automatically when unambiguous. Pass "" (empty string) for No Namespace.*
+//   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
+//   * @throws java.io.IOException if an I/O error occurs while reading the schemaFile
+//   */
   @throws(classOf[java.io.IOException])
   def compileFile(
     schemaFile: File,
@@ -146,25 +146,25 @@ class Compiler private[japi] (private var sCompiler: SCompiler) {
     new ProcessorFactory(pf)
   }
 
-  /**
-   * Compile DFDL schema source into a [[ProcessorFactory]]
-   *
-   * @param uri URI of DFDL schema file used to create a [[ProcessorFactory]].
-   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
-   * @throws java.io.IOException if an I/O error occurs while reading the uri
-   */
+//  /**
+//   * Compile DFDL schema source into a [[ProcessorFactory]]
+//   *
+//   * @param uri URI of DFDL schema file used to create a [[ProcessorFactory]].
+//   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
+//   * @throws java.io.IOException if an I/O error occurs while reading the uri
+//   */
   @throws(classOf[java.io.IOException])
   def compileSource(uri: URI): ProcessorFactory = compileSource(uri, null, null)
 
-  /**
-   * Compile DFDL schema source into a [[ProcessorFactory]]
-   *
-   * @param uri URI of DFDL schema file used to create a [[ProcessorFactory]].
-   * @param rootName name of root element, or null to choose automatically from first element of schema.
-   * @param rootNamespace String of namespace of the root element, or null to infer automatically when unambiguous. Pass "" (empty string) for No Namespace.
-   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
-   * @throws java.io.IOException if an I/O error occurs while reading the uri
-   */
+//  /**
+//   * Compile DFDL schema source into a [[ProcessorFactory]]
+//   *
+//   * @param uri URI of DFDL schema file used to create a [[ProcessorFactory]].
+//   * @param rootName name of root element, or null to choose automatically from first element of schema.
+//   * @param rootNamespace String of namespace of the root element, or null to infer automatically when unambiguous. Pass "" (empty string) for No Namespace.
+//   * @return [[ProcessorFactory]] used to create [[DataProcessor]](s). Must check [[ProcessorFactory#isError]] before using it.
+//   * @throws java.io.IOException if an I/O error occurs while reading the uri
+//   */
   @throws(classOf[java.io.IOException])
   def compileSource(uri: URI, rootName: String, rootNamespace: String): ProcessorFactory = {
     val source = URISchemaSource(uri)
@@ -172,19 +172,19 @@ class Compiler private[japi] (private var sCompiler: SCompiler) {
     new ProcessorFactory(pf.asInstanceOf[SProcessorFactory])
   }
 
-  /**
-   * Reload a saved parser from a file
-   *
-   * To allow jar-file packaging, (where the savedParser might be part of a jar),
-   * it is recommended to use the other version of [[Compiler#reload(java.nio.channels.ReadableByteChannel)]] where the argument is
-   * a [[java.nio.channels.ReadableByteChannel]] for a saved parser.
-   *
-   * @param savedParser file of a saved parser, created with [[DataProcessor#save(java.nio.channels.WritableByteChannel)]]
-   *
-   * @return [[DataProcessor]] used to parse data. Must check [[DataProcessor#isError]] before using it.
-   *
-   * @throws InvalidParserException if the file is not a valid saved parser.
-   */
+//  /**
+//   * Reload a saved parser from a file
+//   *
+//   * To allow jar-file packaging, (where the savedParser might be part of a jar),
+//   * it is recommended to use the other version of [[Compiler#reload(java.nio.channels.ReadableByteChannel)]] where the argument is
+//   * a [[java.nio.channels.ReadableByteChannel]] for a saved parser.
+//   *
+//   * @param savedParser file of a saved parser, created with [[DataProcessor#save(java.nio.channels.WritableByteChannel)]]
+//   *
+//   * @return [[DataProcessor]] used to parse data. Must check [[DataProcessor#isError]] before using it.
+//   *
+//   * @throws InvalidParserException if the file is not a valid saved parser.
+//   */
   @throws(classOf[InvalidParserException])
   def reload(savedParser: File): DataProcessor = {
     try {
@@ -194,15 +194,15 @@ class Compiler private[japi] (private var sCompiler: SCompiler) {
     }
   }
 
-  /**
-   * Reload a saved parser from a [[java.nio.channels.ReadableByteChannel]]
-   *
-   * @param savedParser [[java.nio.channels.ReadableByteChannel]] of a saved parser, created with [[DataProcessor#save(java.nio.channels.WritableByteChannel)]]
-   *
-   * @return [[DataProcessor]] used to parse data. Must check [[DataProcessor#isError]] before using it.
-   *
-   * @throws InvalidParserException if the file is not a valid saved parser.
-   */
+//  /**
+//   * Reload a saved parser from a [[java.nio.channels.ReadableByteChannel]]
+//   *
+//   * @param savedParser [[java.nio.channels.ReadableByteChannel]] of a saved parser, created with [[DataProcessor#save(java.nio.channels.WritableByteChannel)]]
+//   *
+//   * @return [[DataProcessor]] used to parse data. Must check [[DataProcessor#isError]] before using it.
+//   *
+//   * @throws InvalidParserException if the file is not a valid saved parser.
+//   */
   @throws(classOf[InvalidParserException])
   def reload(savedParser: ReadableByteChannel): DataProcessor = {
     try {
@@ -236,12 +236,12 @@ class Compiler private[japi] (private var sCompiler: SCompiler) {
   }
 }
 
-/**
- * Factory to create [[DataProcessor]]'s, used for parsing data
- *
- * Do not use the ProcessorFactry constructor to create a [[ProcessorFactory]].
- * Instead, use [[Compiler#compileFile(java.io.File)]]
- */
+///**
+// * Factory to create [[DataProcessor]]'s, used for parsing data
+// *
+// * Do not use the ProcessorFactry constructor to create a [[ProcessorFactory]].
+// * Instead, use [[Compiler#compileFile(java.io.File)]]
+// */
 class ProcessorFactory private[japi] (private var pf: SProcessorFactory)
   extends WithDiagnostics(pf) {
 
@@ -411,14 +411,14 @@ class DataProcessor private[japi] (private var dp: SDataProcessor)
 
   private def copy(dp: SDataProcessor = dp) = new DataProcessor(dp)
 
-  /**
-   * Obtain a new [[DataProcessor]] instance with debugging enabled or disabled.
-   *
-   * Before enabling, [[DataProcessor#withDebugger(Debugger)]] or [[DataProcessor#withDebuggerRunner(DebuggerRunner)]]
-   * must be called to obtain a [[DataProcessor]] with a non-null debugger.
-   *
-   * @param flag true to enable debugging, false to disabled
-   */
+//  /**
+//   * Obtain a new [[DataProcessor]] instance with debugging enabled or disabled.
+//   *
+//   * Before enabling, [[DataProcessor#withDebugger(Debugger)]] or [[DataProcessor#withDebuggerRunner(DebuggerRunner)]]
+//   * must be called to obtain a [[DataProcessor]] with a non-null debugger.
+//   *
+//   * @param flag true to enable debugging, false to disabled
+//   */
   def withDebugging(flag: Boolean): DataProcessor = {
     copy(dp = dp.withDebugging(flag))
   }
@@ -512,14 +512,14 @@ class DataProcessor private[japi] (private var dp: SDataProcessor)
     }
   }
 
-  /**
-   * Save the DataProcessor
-   *
-   * The resulting output can be reloaded by [[Compiler#reload(java.nio.channels.ReadableByteChannel)]].
-   * Note that external variable bindings are not saved, and will not be restored upon reloading.
-   *
-   * @param output the byte channel to write the [[DataProcessor]] to
-   */
+//  /**
+//   * Save the DataProcessor
+//   *
+//   * The resulting output can be reloaded by [[Compiler#reload(java.nio.channels.ReadableByteChannel)]].
+//   * Note that external variable bindings are not saved, and will not be restored upon reloading.
+//   *
+//   * @param output the byte channel to write the [[DataProcessor]] to
+//   */
   def save(output: WritableByteChannel): Unit = dp.save(output)
 
   /**
@@ -567,10 +567,10 @@ class DataProcessor private[japi] (private var dp: SDataProcessor)
   }
 }
 
-/**
- * Result of calling [[DataProcessor#parse(InputSourceDataInputStream, InfosetOutputter)]], containing
- * the diagnostic information, and the final data location
- */
+///**
+// * Result of calling [[DataProcessor#parse(InputSourceDataInputStream, InfosetOutputter)]], containing
+// * the diagnostic information, and the final data location
+// */
 class ParseResult private[japi] (pr: SParseResult) extends WithDiagnostics(pr) {
 
   /**
@@ -599,10 +599,10 @@ class ParseResult private[japi] (pr: SParseResult) extends WithDiagnostics(pr) {
   def isValidationError(): Boolean = pr.isValidationError
 }
 
-/**
- * Result of calling [[DataProcessor#unparse(InfosetInputter, java.nio.channels.WritableByteChannel)]],
- * containing diagnostic information
- */
+///**
+// * Result of calling [[DataProcessor#unparse(InfosetInputter, java.nio.channels.WritableByteChannel)]],
+// * containing diagnostic information
+// */
 class UnparseResult private[japi] (ur: SUnparseResult) extends WithDiagnostics(ur) {}
 
 /**
