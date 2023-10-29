@@ -43,7 +43,7 @@ trait ComplexElementMetadata extends ElementMetadata {
 }
 
 trait SimpleElementMetadata extends ElementMetadata {
-  def optPrimType: Option[PrimType]
+  def primType: PrimType
 }
 
 trait ModelGroupMetadata extends TermMetadata {}
