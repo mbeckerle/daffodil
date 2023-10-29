@@ -27,7 +27,7 @@ lazy val genVersion = taskKey[Seq[File]]("Generate VERSION file")
 
 lazy val daffodil = project
   .in(file("."))
-  .enablePlugins(JavaUnidocPlugin, ScalaUnidocPlugin)
+  // .enablePlugins(JavaUnidocPlugin, ScalaUnidocPlugin)
   .aggregate(
     cli,
     codeGenC,
@@ -52,7 +52,13 @@ lazy val daffodil = project
     tutorials,
     udf,
   )
-  .settings(commonSettings, nopublish, ratSettings, unidocSettings, genCExamplesSettings)
+  .settings(
+    commonSettings,
+    nopublish,
+    ratSettings,
+    // unidocSettings,
+    genCExamplesSettings,
+  )
 
 lazy val macroLib = Project("daffodil-macro-lib", file("daffodil-macro-lib"))
   .settings(commonSettings, nopublish)
@@ -412,30 +418,30 @@ lazy val ratSettings = Seq(
   ratFailBinaries := true,
 )
 
-lazy val unidocSettings = Seq(
-  ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(sapi, udf),
-  ScalaUnidoc / unidoc / scalacOptions := Seq(
-    "-doc-title",
-    "Apache Daffodil " + version.value + " Scala API",
-    "-doc-root-content",
-    (sapi / baseDirectory).value + "/root-doc.txt",
-  ),
-  JavaUnidoc / unidoc / unidocProjectFilter := inProjects(japi, udf),
-  JavaUnidoc / unidoc / javacOptions := Seq(
-    "-windowtitle",
-    "Apache Daffodil " + version.value + " Java API",
-    "-doctitle",
-    "<h1>Apache Daffodil " + version.value + " Java API</h1>",
-    "-notimestamp",
-    "-quiet",
-  ),
-  JavaUnidoc / unidoc / unidocAllSources := (JavaUnidoc / unidoc / unidocAllSources).value.map {
-    sources =>
-      sources.filterNot { source =>
-        source.toString.contains("$") || source.toString.contains("packageprivate")
-      }
-  },
-)
+//lazy val unidocSettings = Seq(
+//  ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(sapi, udf),
+//  ScalaUnidoc / unidoc / scalacOptions := Seq(
+//    "-doc-title",
+//    "Apache Daffodil " + version.value + " Scala API",
+//    "-doc-root-content",
+//    (sapi / baseDirectory).value + "/root-doc.txt",
+//  ),
+//  JavaUnidoc / unidoc / unidocProjectFilter := inProjects(japi, udf),
+//  JavaUnidoc / unidoc / javacOptions := Seq(
+//    "-windowtitle",
+//    "Apache Daffodil " + version.value + " Java API",
+//    "-doctitle",
+//    "<h1>Apache Daffodil " + version.value + " Java API</h1>",
+//    "-notimestamp",
+//    "-quiet",
+//  ),
+//  JavaUnidoc / unidoc / unidocAllSources := (JavaUnidoc / unidoc / unidocAllSources).value.map {
+//    sources =>
+//      sources.filterNot { source =>
+//        source.toString.contains("$") || source.toString.contains("packageprivate")
+//      }
+//  },
+//)
 
 lazy val genCExamplesSettings = Seq(
   Compile / genCExamples := {
@@ -474,3 +480,5 @@ lazy val genCExamplesSettings = Seq(
     res
   },
 )
+
+Compile / packageDoc / publishArtifact := false
