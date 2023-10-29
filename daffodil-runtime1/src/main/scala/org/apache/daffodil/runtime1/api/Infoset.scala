@@ -17,23 +17,23 @@
 
 package org.apache.daffodil.runtime1.api
 
+import java.lang.{ Boolean => JBoolean }
+import java.lang.{ Byte => JByte }
+import java.lang.{ Double => JDouble }
+import java.lang.{ Float => JFloat }
+import java.lang.{ Integer => JInt }
+import java.lang.{ Long => JLong }
+import java.lang.{ Number => JNumber }
+import java.lang.{ Short => JShort }
+import java.lang.{ String => JString }
+import java.math.{ BigDecimal => JBigDecimal }
+import java.math.{ BigInteger => JBigInt }
+import java.net.URI
+
 import org.apache.daffodil.lib.calendar.DFDLCalendar
 import org.apache.daffodil.lib.calendar.DFDLDate
 import org.apache.daffodil.lib.calendar.DFDLDateTime
 import org.apache.daffodil.lib.calendar.DFDLTime
-
-import java.lang.{Boolean => JBoolean}
-import java.lang.{Byte => JByte}
-import java.lang.{Double => JDouble}
-import java.lang.{Float => JFloat}
-import java.lang.{Integer => JInt}
-import java.lang.{Long => JLong}
-import java.lang.{Number => JNumber}
-import java.lang.{Short => JShort}
-import java.lang.{String => JString}
-import java.math.{BigDecimal => JBigDecimal}
-import java.math.{BigInteger => JBigInt}
-import java.net.URI
 
 /**
  * API access to array objects in the DFDL Infoset
@@ -73,7 +73,7 @@ trait InfosetSimpleElement extends InfosetElement {
   /**
    * Caches the string so we're not allocating strings repeatedly
    */
-  protected def dataValueAsString: String
+  def dataValueAsString: String
 
   /*
    * These are so that API users don't have to know about our

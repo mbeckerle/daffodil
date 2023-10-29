@@ -24,16 +24,14 @@ import org.apache.daffodil.runtime1.api.BlobMethodsImpl
 import org.apache.daffodil.runtime1.api.InfosetArray
 import org.apache.daffodil.runtime1.api.InfosetComplexElement
 import org.apache.daffodil.runtime1.api.InfosetSimpleElement
+import org.apache.daffodil.runtime1.api.Status.READY
+import org.apache.daffodil.runtime1.api.Status.Status
 import org.apache.daffodil.runtime1.dpath.NodeInfo
-import org.apache.daffodil.runtime1.infoset.DIComplex
-import org.apache.daffodil.runtime1.infoset.DISimple
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.EndDocument
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.EndElement
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.StartDocument
 import org.apache.daffodil.runtime1.infoset.InfosetInputterEventType.StartElement
-import org.apache.daffodil.runtime1.api.Status.READY
-import org.apache.daffodil.runtime1.api.Status.Status
 import org.apache.daffodil.sapi.infoset.InfosetInputter
 import org.apache.daffodil.sapi.infoset.InfosetOutputter
 
@@ -109,40 +107,37 @@ case class TestInfosetOutputter() extends BlobMethodsImpl with InfosetOutputter 
     events.append(TestInfosetEvent.endDocument())
   }
 
-  override def startSimple(se: InfosetSimpleElement): Unit = {
-    val diSimple = se.asInstanceOf[DISimple]
+  override def startSimple(diSimple: InfosetSimpleElement): Unit = {
     events.append(
       TestInfosetEvent.startSimple(
-        diSimple.erd.name,
-        diSimple.erd.namedQName.namespace,
+        diSimple.name,
+        diSimple.namespace,
         diSimple.dataValueAsString,
-        if (diSimple.erd.isNillable) MaybeBoolean(diSimple.isNilled) else MaybeBoolean.Nope,
+        if (diSimple.metadata.isNillable) MaybeBoolean(diSimple.isNilled) else MaybeBoolean.Nope,
       ),
     )
   }
 
-  override def endSimple(se: InfosetSimpleElement): Unit = {
-    val diSimple = se.asInstanceOf[DISimple]
+  override def endSimple(diSimple: InfosetSimpleElement): Unit = {
     events.append(
-      TestInfosetEvent.endSimple(diSimple.erd.name, diSimple.erd.namedQName.namespace),
+      TestInfosetEvent.endSimple(diSimple.name, diSimple.namespace),
     )
   }
 
-  override def startComplex(ce: InfosetComplexElement): Unit = {
-    val diComplex = ce.asInstanceOf[DIComplex]
+  override def startComplex(diComplex: InfosetComplexElement): Unit = {
     events.append(
       TestInfosetEvent.startComplex(
-        diComplex.erd.name,
-        diComplex.erd.namedQName.namespace,
-        if (diComplex.erd.isNillable) MaybeBoolean(diComplex.isNilled) else MaybeBoolean.Nope,
+        diComplex.name,
+        diComplex.namespace,
+        if (diComplex.metadata.isNillable) MaybeBoolean(diComplex.isNilled)
+        else MaybeBoolean.Nope,
       ),
     )
   }
 
-  override def endComplex(ce: InfosetComplexElement): Unit = {
-    val diComplex = ce.asInstanceOf[DIComplex]
+  override def endComplex(diComplex: InfosetComplexElement): Unit = {
     events.append(
-      TestInfosetEvent.endComplex(diComplex.erd.name, diComplex.erd.namedQName.namespace),
+      TestInfosetEvent.endComplex(diComplex.name, diComplex.namespace),
     )
   }
 
