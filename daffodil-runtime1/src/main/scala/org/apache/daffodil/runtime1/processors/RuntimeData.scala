@@ -50,6 +50,7 @@ import org.apache.daffodil.runtime1.api.SimpleElementMetadata
 import org.apache.daffodil.runtime1.api.TermMetadata
 import org.apache.daffodil.runtime1.dpath.NodeInfo
 import org.apache.daffodil.runtime1.dpath.NodeInfo.PrimType
+import org.apache.daffodil.runtime1.dpath.PrimTypeNode
 import org.apache.daffodil.runtime1.dsom.CompiledExpression
 import org.apache.daffodil.runtime1.dsom.DPathCompileInfo
 import org.apache.daffodil.runtime1.dsom.DPathElementCompileInfo
@@ -679,7 +680,7 @@ sealed class ElementRuntimeData(
   final override def childMetadata: Seq[ElementRuntimeData] = childERDs
 
   def isSimpleType = optPrimType.isDefined
-  override def primType: PrimType = optPrimType.orNull
+  override def primType: PrimTypeNode = optPrimType.asInstanceOf[Option[PrimTypeNode]].orNull
 
   lazy val schemaURIStringsForFullValidation: Seq[String] =
     schemaURIStringsForFullValidation1.distinct

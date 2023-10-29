@@ -3,7 +3,7 @@ package org.apache.daffodil.runtime1.api
 import org.apache.daffodil.lib.exceptions.SchemaFileLocation
 import org.apache.daffodil.lib.xml.NS
 import org.apache.daffodil.lib.xml.NamedQName
-import org.apache.daffodil.runtime1.dpath.NodeInfo.PrimType
+import org.apache.daffodil.runtime1.dpath.PrimTypeNode
 
 /*
  * This is the supportable API for access to the RuntimeData structures
@@ -43,7 +43,7 @@ trait ComplexElementMetadata extends ElementMetadata {
 }
 
 trait SimpleElementMetadata extends ElementMetadata {
-  def primType: PrimType
+  def primType: PrimTypeNode
 }
 
 trait ModelGroupMetadata extends TermMetadata {}
