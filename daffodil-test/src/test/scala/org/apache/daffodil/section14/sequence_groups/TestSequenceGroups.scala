@@ -119,7 +119,7 @@ class TestSequenceGroups {
   }
 
   // DFDL-284
-  // @Test def test_hiddenGroupLoop() { runner_02.runOneTest("hiddenGroupLoop") }
+  // @Test def test_hiddenGroupLoop(): Unit = { runner_02.runOneTest("hiddenGroupLoop") }
 
   // DFDL-598(related to, but this test does not say this is fixed)
   @Test def test_hiddenGroupRefEmptyString(): Unit = {

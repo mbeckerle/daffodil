@@ -329,9 +329,29 @@ trait AnnotatedSchemaComponent
    * to its complex type because we don't combine properties with that
    * in DFDL v1.0. (I consider that a language design bug in DFDL v1.0, but
    * that is the way it's defined.)
+   *
+   * This is one hop only. I.e., a component refers to another component directly,
+   * not the transitive closure of this relationship.
    */
-  final protected def refersToForPropertyCombining: Option[AnnotatedSchemaComponent] =
-    optReferredToComponent
+  final protected lazy val refersToForPropertyCombining: Option[AnnotatedSchemaComponent] =
+    this match {
+      case e: ElementDeclMixin => e.typeDef match {
+        case std: SimpleTypeDefBase => Some(std)
+        case ctd: ComplexTypeBase =>
+          None // in DFDL v1.0 complex types are not annotated, so can't carry properties nor statements.
+        case _ => None
+      }
+      case er: AbstractElementRef => Some(er.referencedElement)
+      case gr: GroupRef => Some(gr.groupDef)
+      case st: SimpleTypeDefBase => {
+        st.optRestriction.flatMap {
+          _.optBaseTypeDef
+        }
+        // note: no combining with the members of unions
+      }
+      case _ => None
+    }
+
 
   def optReferredToComponent: Option[AnnotatedSchemaComponent] // override in ref objects
 

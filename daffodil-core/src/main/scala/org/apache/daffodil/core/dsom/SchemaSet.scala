@@ -17,9 +17,6 @@
 
 package org.apache.daffodil.core.dsom
 
-import java.io.File
-import scala.xml.Node
-
 import org.apache.daffodil.core.compiler.RootSpec
 import org.apache.daffodil.core.grammar.Gram
 import org.apache.daffodil.core.grammar.SchemaSetGrammarMixin
@@ -31,12 +28,16 @@ import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.exceptions.ThrowsSDE
 import org.apache.daffodil.lib.oolag.OOLAG
 import org.apache.daffodil.lib.schema.annotation.props.LookupLocation
-import org.apache.daffodil.lib.util.TransitiveClosure
+import org.apache.daffodil.lib.util.TransitiveClosureWithCycleDetection
 import org.apache.daffodil.lib.xml.DFDLCatalogResolver
+import org.apache.daffodil.lib.xml.NoNamespace
 import org.apache.daffodil.lib.xml.NS
+import org.apache.daffodil.lib.xml.RefQName
 import org.apache.daffodil.lib.xml.XMLUtils
-import org.apache.daffodil.lib.xml._
 import org.apache.daffodil.runtime1.dpath.NodeInfo
+
+import java.io.File
+import scala.xml.Node
 
 object SchemaSet {
   def apply(
@@ -679,23 +680,25 @@ final class SchemaSet private (
     }
   }
 
-  private lazy val allSchemaComponentsSet = TransitiveClosureSchemaComponents(
-    startingGlobalComponents,
-  )
+  private lazy val allSchemaComponentsSet =
+    TransitiveClosureSchemaComponents(startingGlobalComponents)
 
   lazy val allSchemaComponents = allSchemaComponentsSet.toIndexedSeq
 }
 
-object TransitiveClosureSchemaComponents {
-  def apply(ssc: Seq[SchemaComponent]) =
-    (new TransitiveClosureSchemaComponents())(ssc)
-}
-
-class TransitiveClosureSchemaComponents private () extends TransitiveClosure[SchemaComponent] {
+object TransitiveClosureSchemaComponents
+  extends TransitiveClosureWithCycleDetection[SchemaComponent] {
 
   type SSC = Seq[SchemaComponent]
 
-  override protected def func(sc: SchemaComponent) = {
+  override protected def cycleDetected(cycle: Seq[SchemaComponent]): Unit = {
+    Assert.invariant(cycle.nonEmpty)
+    val first = cycle.head
+    first.schemaDefinitionErrorButContinue(
+      "Cycle through these components: %s", cycle.map{ _.diagnosticDebugName}.mkString(", "))
+  }
+
+  override protected def func(sc: SchemaComponent): Seq[SchemaComponent] = {
     val referents: SSC = sc match {
       case asc: AnnotatedSchemaComponent => asc.optReferredToComponent.toSeq
       case _ => Nil

@@ -278,10 +278,10 @@ final class Union private (val xmlArg: Node, simpleTypeDef: SimpleTypeDefBase)
     strings
   }
   private lazy val namedTypeQNames = namedTypeQNameStrings.map { qns => resolveQName(qns) }
-  private lazy val namedTypes: Seq[GlobalSimpleTypeDef] = namedTypeQNames.map { qn =>
+  lazy val namedTypes: Seq[GlobalSimpleTypeDef] = namedTypeQNames.map { qn =>
     schemaSet.getGlobalSimpleTypeDef(qn).get
   }
-  private lazy val directMemberTypes: Seq[SimpleTypeDefBase] = namedTypes ++ immediateTypes
+  lazy val directMemberTypes: Seq[SimpleTypeDefBase] = namedTypes ++ immediateTypes
 
   lazy val unionMemberTypes: Seq[SimpleTypeDefBase] = {
     schemaDefinitionUnless(

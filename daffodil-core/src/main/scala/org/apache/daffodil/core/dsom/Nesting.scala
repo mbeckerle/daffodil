@@ -30,6 +30,73 @@ case class EnclosingComponentDef(encloser: SchemaComponent, lexicalPosition: Int
 
 trait NestingLexicalMixin { self: SchemaComponent =>
 
+  /**
+   * Schema components lexically contained within this schema component, excluding annotations.
+   * So elements, groups, types, but not the annotations on those.
+   *
+   * This is one-hop, not the transitive closure of this relationship.
+   *
+   * The inverse of this relationship is the optLexicalParent.
+   * @return a sequence of lexically contained schema components
+   */
+  final lazy val containedNonAnnotationSchemaComponents: Seq[SchemaComponent] = {
+    self match {
+      case e: ElementDeclMixin => e.immediateType.toSeq
+      case ct: ComplexTypeBase => Seq(ct.modelGroup)
+      case st: SimpleTypeDefBase => st.optUnion.map{ u: Union => u.directMemberTypes }.getOrElse(Nil)
+      case mg: ModelGroup => mg.groupMembers
+      case _ => Nil
+    }
+  }
+
+  /**
+   * Schema components referenced by name from this schema component, excluding
+   * references from or to annotations.
+   * Includes elements references to type defs, element refs to elements,
+   * group refs to group defs, type refs to type defs.
+   *
+   * Also includes dfdl:prefixLengthType, as a special kind of type reference from
+   * element decls.
+   *
+   * Also includes dfdl:repType as a special kind of type reference from
+   * simple type defs.
+   *
+   * This is one-hop, not the transitive closure of this relationship.
+   * @return a sequence of the schema components referenced from this one.
+   */
+  final lazy val referencedNonAnnotationSchemaComponents: Seq[SchemaComponent] = LV('referencedSchemaComponents){
+    self match {
+      case er: AbstractElementRef => Seq(er.referencedElement)
+      //
+      // Element declarations can reference types
+      //
+      case e: ElementDeclMixin => {
+        val eb = e.asInstanceOf[ElementBase]
+        val typeRefs = e.namedType match{
+          case Some(std: SimpleTypeDefBase) => Some(std.asInstanceOf[SchemaComponent]).toSeq
+          case Some(ct: ComplexTypeBase) => Some(ct.asInstanceOf[SchemaComponent]).toSeq
+          case _ => Nil
+        }
+        typeRefs ++ eb.optPrefixLengthElementDecl ++ eb.optRepTypeElementDecl
+      }
+      //
+      // No special case for hidden group ref. Those have already been replaced by
+      // either a sequence group ref or choice group ref with the isHidden flag.
+      //
+      case gr: GroupRef => Seq(gr.groupDef)
+      case s: SequenceDefMixin if s.hiddenGroupRefOption.isDefined =>
+        Assert.invariantFailed("Sequence with hidden group ref should already have been replaced by a GroupRef object.")
+      case std: SimpleTypeDefBase => {
+        // a restriction always references a base type by name, we just want to exclude bases that are primitives
+        val restrictionRef = std.optRestriction.flatMap{ _.optBaseTypeDef }
+        // a union can reference member types by name.
+        val unionRefs = std.optUnion.map{ _.namedTypes }.getOrElse(Nil)
+        unionRefs ++ restrictionRef
+      }.toSeq
+      case _ => Nil
+    }
+  }.value
+
   /** The lexically enclosing schema component */
   def optLexicalParent: Option[SchemaComponent]
 
