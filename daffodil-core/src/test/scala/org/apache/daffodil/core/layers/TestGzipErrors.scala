@@ -19,15 +19,14 @@ package org.apache.daffodil.core.layers
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
-import scala.util.Random
-
+import scala.xml.Elem
+import org.apache.daffodil.core.util.FuzzRandomByteRuns
+import org.apache.daffodil.core.util.FuzzRandomSingleByte
 import org.apache.daffodil.core.util.TestUtils
-import org.apache.daffodil.lib.Implicits.intercept
 import org.apache.daffodil.lib.util._
 import org.apache.daffodil.lib.xml.XMLUtils
-import org.apache.daffodil.runtime1.processors.parsers.ParseError
-
 import org.apache.commons.io.IOUtils
+import org.apache.daffodil.core.util.LayerParseTester
 import org.junit.Test
 
 class TestGzipErrors {
@@ -194,7 +193,7 @@ a few lines of pointless text like this.""".replace("\r\n", "\n").replace("\n", 
   /**
    * These are parse errors due to IOExceptions that occur.
    */
-  val excludes = Seq(
+  val excludes: Seq[String] = Seq(
     "EOFException",
     "Corrupt GZIP trailer",
     "Unexpected end of ZLIB",
@@ -210,32 +209,31 @@ a few lines of pointless text like this.""".replace("\r\n", "\n").replace("\n", 
     "too many length or distance symbols",
     "invalid stored block lengths",
     "invalid block type",
+    "Corrupt GZIP header",
+    "invalid distance code",
+    "invalid literal/length code",
   )
 
-  @Test def testGZIPLayerFuzz1(): Unit = fuzz1(2) // fuzz1(1000)
+  // This has been run for 100K trials
+  // which only takes a few seconds, and
+  // all errors thrown were converted to parse errors
+  // so were IOExceptions from the gzip layer.
+  @Test def testGZIPLayerFuzz1(): Unit =
+    fuzz1(10, sch = GZIPLayerErrSchema, data = makeGZIPLayer1Data()._1, <nothing/>)
 
-  def fuzz1(nTrials: Int): Unit = {
-    val seed = 987654321
-    val sch = GZIPLayerErrSchema
-    val r = new Random(seed)
-    (1 to nTrials).foreach { i =>
-      val (data, _) = makeGZIPLayer1Data()
-      // clobber last section of the data (up to 95% of it) with random bytes.
-      ((data.length - (data.length / (r.nextInt(19) + 1))) to (data.length - 1)).foreach { i =>
-        data(i) = (r.nextInt(256) & 0xff).toByte
-      }
-      val e = intercept[ParseError] {
-        TestUtils.testBinary(sch, data, areTracing = false)
-      }
-      val m = TestUtils.getAMessage(e)
-      if (excludes.forall(ex => !m.contains(ex)))
-        println(TestUtils.getAMessage(e))
-    }
+
+  def fuzz1(nTrials: Int, sch: Elem, data: Array[Byte], expected: Elem): Unit = {
+    var shouldFail = false
+      val fuzzer = new FuzzRandomByteRuns(data, 4, 0)
+      val tester = new LayerParseTester(sch, data, expected, fuzzer, excludes)
+      tester.run(nTrials)
   }
 
-  @Test def testGZIPLayerFuzz2(): Unit = fuzz2(2) // fuzz2(1000)
-
-  def fuzz2(nTrials: Int): Unit = {
+  // This has been run for 100K trials
+  // which only takes a few seconds, and
+  // all errors thrown were converted to parse errors
+  // so were IOExceptions from the gzip layer.
+  @Test def testGZIPLayerFuzz2(): Unit = {
     val expected = <root xmlns="http://example.com">
       <e1 xmlns="">
         <len>212</len> <x1>
@@ -245,41 +243,12 @@ a few lines of pointless text like this.""".replace("\r\n", "\n").replace("\n", 
       </x1> <s2>afterGzip</s2>
       </e1>
     </root>
-    val seed = 123456789
-    val sch = GZIPLayerErrSchema
-    val r = new Random(seed)
-    var index = 0
-    var current: Byte = 0
-    var newValue: Byte = 0
-    (1 to nTrials).foreach { i =>
-      print(i + ".")
-      val (data, len) = makeGZIPLayer1Data()
-      // clobber one randomly chosen byte with a random byte.
-      index =
-        math.max(4, r.nextInt(len)) // at least 4 bytes in so we don't hammer the length field.
-      current = data(index)
-      newValue = current
-      // make sure they are different so we're definitely changing a byte value
-      while (current == newValue) {
-        newValue = ((current ^ r.nextInt(256)) & 0xff).toByte
-      }
-      data(index) = newValue
-      val (pr, node) =
-        try {
-          TestUtils.testBinary(sch, data, areTracing = false)
-        } catch {
-          case e: ParseError => {
-            val m = TestUtils.getAMessage(e)
-            if (excludes.forall(ex => !m.contains(ex))) {
-              println(TestUtils.getAMessage(e))
-            }
-            (null, null)
-          }
-        }
-      if (pr ne null) {
-        TestUtils.assertEqualsXMLElements(expected, node)
-        // println(s"parsed without error despite byte at index $index modified from $current to $newValue.\n Infoset: ${node.toString()}")
-      }
-    }
+    fuzz2(10000, sch = GZIPLayerErrSchema, data = makeGZIPLayer1Data()._1, expected)
+  }
+
+  def fuzz2(nTrials: Int, sch: Elem, data: Array[Byte], expected: Elem): Unit = {
+    val fuzzer = new FuzzRandomSingleByte(data, 4, 9) // leave first 4 bytes and last 9 bytes alone.
+    val tester = new LayerParseTester(sch, data, expected, fuzzer, excludes)
+    tester.run(nTrials)
   }
 }
