@@ -20,6 +20,7 @@ package org.apache.daffodil.runtime1.layers
 import java.io.FilterInputStream
 import java.io.InputStream
 import java.io.OutputStream
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 import org.apache.daffodil.io.DataInputStream.Mark
 import org.apache.daffodil.io.DataOutputStream
@@ -79,8 +80,37 @@ object LayerDriver {
  */
 class LayerDriver private (val layer: Layer) {
 
-  def init(): Unit =
-    layer.getLayerRuntime.layerVarsRuntime.callParamSetterWithParameterVars(this.layer)
+  def init(): Unit = {
+    try {
+      // timing here is subtle.
+      // This could throw, but the steps after this are necessary
+      // in order to properly handle the thrown exception
+      //
+      layer.getLayerRuntime.layerVarsRuntime.callParamSetterWithParameterVars(this.layer)
+    } finally {
+      //
+      // because we want to deal with RuntimeException as if it was NOT a subclass of
+      // Exception, we first divide up the classes as to whether they are RuntimeExceptions or not.
+      val (runtimeExceptionSubClasses, regularExceptionSubclasses) =
+        layer.getProcessingErrorExceptions.partition { c =>
+          classOf[RuntimeException].isAssignableFrom(c)
+        }
+
+      setLayerThrowHandler(new LayerThrowHandler() {
+        override def handleThrow(t: Throwable): Unit = {
+          val tc = t.getClass
+          val isRuntimeException = classOf[RuntimeException].isAssignableFrom(tc)
+          if (isRuntimeException) {
+            if (runtimeExceptionSubClasses.exists { ec => ec.isAssignableFrom(tc) })
+              layer.processingError(t)
+          } else {
+            if (regularExceptionSubclasses.exists { ec => ec.isAssignableFrom(tc) })
+              layer.processingError(t)
+          }
+        }
+      })
+    }
+  }
 
   def layerRuntime: LayerRuntime = layer.getLayerRuntime
 
@@ -154,7 +184,7 @@ class LayerDriver private (val layer: Layer) {
       case _ =>
         // if the layer supplies a handler, then
         // we invoke it.
-        val layerHandler = layer.getLayerThrowHandler
+        val layerHandler = getLayerThrowHandler
         if (layerHandler ne null)
           layerHandler.handleThrow(t)
         // if we get here, the layer handler didn't exist or
@@ -257,6 +287,32 @@ class LayerDriver private (val layer: Layer) {
       }
     }
   }
+
+  private var lth: LayerThrowHandler = null
+
+  trait LayerThrowHandler {
+    def handleThrow(t: Throwable): Unit
+  }
+
+  /**
+   * If you set a layer throw handler, then if the layer code throws
+   * anything, the handler is invoked and can convert specific kinds of
+   * exceptions into processing errors or runtime SDEs.
+   *
+   * If the handler does not throw or call processingError or
+   * runtimeSchemaDefinitionError, then the throw is treated as
+   * if there was no handler, and propagates generally as a fatal error.
+   *
+   * @param lth the throw handler
+   */
+  def setLayerThrowHandler(lth: LayerThrowHandler): Unit = {
+    this.lth = lth
+  }
+
+  def getLayerThrowHandler: LayerThrowHandler = {
+    return this.lth
+  }
+
 }
 
 /**

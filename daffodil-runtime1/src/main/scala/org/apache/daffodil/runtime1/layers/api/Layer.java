@@ -21,6 +21,8 @@ import org.apache.daffodil.runtime1.layers.LayerUtils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the primary API class for writing layers.
@@ -176,29 +178,35 @@ public abstract class Layer {
    */
   public abstract OutputStream wrapLayerOutput(OutputStream jos) throws Exception;
 
-  private LayerThrowHandler lth = null;
-
-  public static interface LayerThrowHandler {
-    public void handleThrow(Throwable t);
-  }
+  private ArrayList<Class<? extends Exception>> peExceptions = new ArrayList<>();
 
   /**
-   * If you set a layer throw handler, then if the layer code throws
-   * anything, the handler is invoked and can convert specific kinds of
-   * exceptions into processing errors or runtime SDEs.
+   * Adds an exception class to the list of exceptions that will be automatically converted
+   * into processing errors.
+   * <p/>
+   * The purpose of this is to allow one to use java/scala libraries that may throw
+   * exceptions when encountering bad data. Such exceptions should be translated into
+   * processing errors, which will allow the parser to backtrack and try other alternatives
+   * which may work for that data.
+   * <p/>
+   * When considering whether a thrown Exception is to be converted to a processing error
+   * RuntimeException classes are handled separately from Exception classes.
+   * Hence calling
+   * <pre>
+   *     setProcessingErrorException(Exception.class);
+   * </pre>
+   * will NOT cause all RuntimeExceptions to also be converted into processing errors.
+   * It will, however, cause all classes derived from Exception that are NOT RuntimeExceptions
+   * to be caught and converted into Processing Errors.
    *
-   * If the handler does not throw or call processingError or
-   * runtimeSchemaDefinitionError, then the throw is treated as
-   * if there was no handler, and propagates generally as a fatal error.
-   *
-   * @param lth the throw handler
+   * @param e the exception class to be added to the list of processing error exceptions
    */
-  public final void setLayerThrowHandler(LayerThrowHandler lth) {
-    this.lth = lth;
+  public final void setProcessingErrorException(Class<? extends Exception> e) {
+    peExceptions.add(e);
   }
 
-  public final LayerThrowHandler getLayerThrowHandler() {
-    return this.lth;
+  public final List<Class<? extends Exception>> getProcessingErrorExceptions() {
+    return peExceptions;
   }
 
 }

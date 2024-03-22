@@ -26,7 +26,6 @@ import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.lib.exceptions.ThrowsSDE
 import org.apache.daffodil.lib.schema.annotation.props.Enum
 import org.apache.daffodil.runtime1.layers.api.Layer
-import org.apache.daffodil.runtime1.layers.api.Layer.LayerThrowHandler
 
 /**
  * This layer has bombWhere and bombHow variables to enable
@@ -92,14 +91,7 @@ final class STL_BombOutLayer() extends Layer("stlBombOutLayer", "urn:STL") {
   private var bombWhere: Loc = _
   private var bombHow: Kind = _
 
-  private def lth = new LayerThrowHandler() {
-
-    /** Convert all Exception throws into Processing Errors  */
-    override def handleThrow(t: Throwable): Unit = t match {
-      case e: Exception => processingError(e)
-    }
-  }
-  setLayerThrowHandler(lth)
+  setProcessingErrorException(classOf[Exception])
 
   private def bomb(loc: Loc): Unit = {
     loc match {

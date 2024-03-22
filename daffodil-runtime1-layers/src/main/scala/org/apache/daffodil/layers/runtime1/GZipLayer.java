@@ -51,19 +51,8 @@ public final class GZipLayer extends Layer {
 
   public GZipLayer() {
     super("gzip", "urn:org.apache.daffodil.layers.gzip");
-
-    // we need a layer throw handler to convert any IOExceptions into
-    // processing errors so they can backtrack (i.e., are not fatal)
-    setLayerThrowHandler(new LayerThrowHandler() {
-      @Override
-      public void handleThrow(Throwable t) {
-        // Fuzz testing shows gzip does a good job converting all sorts of parse errors
-        // into IOException. If there were other kinds of exceptions thrown, we could also
-        // catch them here.
-        if (t instanceof IOException)
-          processingError(t);
-      }
-    });
+    // convert IOExceptions to Processing Errors
+    setProcessingErrorException(IOException.class);
   }
 
   @Override
