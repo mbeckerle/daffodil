@@ -59,12 +59,54 @@ public final class GZipLayer extends Layer {
   @Override
   public InputStream wrapLayerInput(InputStream jis) {
     InputStream gzs = null;
-      try {
-          gzs = new GZIPInputStream(jis);
-      } catch (IOException e) {
-          processingError(e);
-      }
-      return gzs;
+    try {
+      gzs = new GZIPInputStream(jis) {
+        @Override
+        public int read() {
+          int result = 0;
+          try {
+            result = super.read();
+          } catch (Throwable t) {
+            // convert any I/O exception into a processing error
+            handleThrow(t);
+          }
+          return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) {
+          int result = 0;
+          try {
+            result = super.read(b, off, len);
+          } catch (Throwable t) {
+            handleThrow(t);
+          }
+          return result;
+        }
+
+        @Override
+        public void close() {
+          try {
+            super.close();
+          } catch (Throwable t) {
+            handleThrow(t);
+          }
+        }
+      };
+    } catch (Throwable t) {
+      handleThrow(t);
+    }
+    return gzs;
+  }
+
+  void handleThrow(Throwable t) {
+    try {
+      throw t;
+    } catch (IOException e) {
+      processingError(e);
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -123,7 +165,7 @@ class GZIPFixedOutputStream extends OutputStream {
       // underlying OutputStream. This may be more efficient than the default
       // OutputStream write() function, which writes the bytes from this array
       // one at a time
-      write(b, off, len);
+      os.write(b, off, len);
     } else {
       // The bad byte has not been fixed yet. Unless a newer version of Java
       // has made changes, the GZIPOutputStreamm will have passed in a 10 byte
@@ -141,18 +183,18 @@ class GZIPFixedOutputStream extends OutputStream {
     if (bytePosition < 0) {
       // The bad byte has already been fixed, simply pass this byte through to
       // the underlying OutputStream
-      write(b);
+      os.write(b);
     } else if (bytePosition < 9) {
       // The bad byte has not been fixed, and we haven't reached it yet, simply
       // pass this byte through and increment our byte position
-      write(b);
+      os.write(b);
       bytePosition += 1;
     } else if (bytePosition == 9) {
       // This is the bad byte, it is a 0 on some Java versions. Write 255
       // instead of to match Java 16+ behavior. Also, set bytePosition to -1 to
       // signify that we have fixed the bad byte and that all other writes
       // should just pass directly to the underlying OutputStream
-      write(255);
+      os.write(255);
       bytePosition = -1;
     }
   }

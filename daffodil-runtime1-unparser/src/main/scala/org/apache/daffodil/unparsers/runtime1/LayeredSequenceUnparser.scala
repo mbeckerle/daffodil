@@ -21,7 +21,6 @@ import org.apache.daffodil.lib.exceptions.UnsuppressableException
 import org.apache.daffodil.runtime1.dsom.RuntimeSchemaDefinitionError
 import org.apache.daffodil.runtime1.layers.LayerDriver
 import org.apache.daffodil.runtime1.layers.LayerFatalException
-import org.apache.daffodil.runtime1.layers.LayerUnexpectedException
 import org.apache.daffodil.runtime1.processors.SequenceRuntimeData
 import org.apache.daffodil.runtime1.processors.unparsers._
 
@@ -109,7 +108,8 @@ class LayeredSequenceUnparser(
       case sde: RuntimeSchemaDefinitionError =>
         throw sde
       case e: Exception =>
-        state.toss(state.toProcessingError(new LayerUnexpectedException(e)))
+        // state.toss(state.toProcessingError(new LayerUnexpectedException(e)))
+        throw new LayerFatalException(e)
     } finally {
       // reset the state so subsequent unparsers write to the following DOS
       state.dataOutputStream = layerFollowingDOS

@@ -37,6 +37,7 @@ import org.apache.daffodil.runtime1.dsom.RuntimeSchemaDefinitionError
 import org.apache.daffodil.runtime1.layers.api.Layer
 import org.apache.daffodil.runtime1.processors.ParseOrUnparseState
 import org.apache.daffodil.runtime1.processors.ProcessingError
+import org.apache.daffodil.runtime1.processors.unparsers.UnparseError
 
 import passera.unsigned.ULong
 
@@ -215,7 +216,8 @@ class LayerDriver private (val layer: Layer) {
         case re: RuntimeException =>
           throw new LayerFatalException(re)
         case e: Exception =>
-          layer.getLayerRuntime.processingError(new LayerUnexpectedException(e))
+          throw new LayerFatalException(e)
+        // layer.getLayerRuntime.processingError(new LayerUnexpectedException(e))
       }
     }
 
@@ -304,8 +306,27 @@ class JavaIOOutputStream(dos: DataOutputStream, layer: Layer) extends OutputStre
       try {
         lvr.callGettersToPopulateResultVars(layer)
       } catch {
-        case ite: InvocationTargetException =>
-          layer.processingError(ite.getCause)
+        case ite: InvocationTargetException => {
+          // layer.processingError(ite.getCause)
+          ite.getCause match {
+            case null =>
+              Assert.invariantFailed(
+                "InvocationTargetException is always supposed to have a cause.",
+              )
+            case u: UnsuppressableException =>
+              throw u
+            case lre: LayerFatalException =>
+              throw lre
+            case re: RuntimeException =>
+              throw new LayerFatalException(re)
+            case pe: UnparseError =>
+              throw pe
+            case sde: RuntimeSchemaDefinitionError =>
+              throw sde
+            case e: Exception =>
+              throw new LayerFatalException(e)
+          }
+        }
       } finally {
         closed = true
       }

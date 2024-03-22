@@ -22,7 +22,6 @@ import org.apache.daffodil.runtime1.dsom.RuntimeSchemaDefinitionError
 import org.apache.daffodil.runtime1.layers.LayerDriver
 import org.apache.daffodil.runtime1.layers.LayerFatalException
 import org.apache.daffodil.runtime1.layers.LayerProcessingException
-import org.apache.daffodil.runtime1.layers.LayerUnexpectedException
 import org.apache.daffodil.runtime1.processors.ProcessingError
 import org.apache.daffodil.runtime1.processors.SequenceRuntimeData
 
@@ -69,7 +68,8 @@ class LayeredSequenceParser(
       case le: LayerProcessingException =>
         state.toss(state.toProcessingError(le))
       case e: Exception =>
-        state.toss(state.toProcessingError(new LayerUnexpectedException(e)))
+        throw new LayerFatalException(e)
+      // state.toss(state.toProcessingError(new LayerUnexpectedException(e)))
     }
   }
 }

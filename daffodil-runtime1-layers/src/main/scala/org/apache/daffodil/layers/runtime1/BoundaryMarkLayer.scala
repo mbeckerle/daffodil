@@ -22,6 +22,7 @@ import java.nio.charset.Charset
 
 import org.apache.daffodil.io.BoundaryMarkInsertingJavaOutputStream
 import org.apache.daffodil.io.BoundaryMarkLimitingInputStream
+import org.apache.daffodil.lib.exceptions.Assert
 import org.apache.daffodil.runtime1.layers.api.Layer
 
 /**
@@ -86,7 +87,10 @@ final class BoundaryMarkLayer
       // the runtime exceptions thrown by forName want to be
       // caught and turned into regular Exceptions.
       // That's not generally true, but it is for encodings/charsets.
-      case re: RuntimeException => throw new Exception(re)
+      case re: RuntimeException => {
+        processingError(re) // throw new Exception(re)
+        Assert.impossible("unreachable")
+      }
     }
 
   override def wrapLayerInput(jis: InputStream): InputStream = {
