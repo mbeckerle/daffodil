@@ -114,6 +114,10 @@ class TestLayers2 {
   @Test def testBombCloseOutputThrowEXWithSuspension(): Unit =
     runnerB.runOneTest("testBombCloseOutputThrowEXWithSuspension")
 
+  //
+  // KEEP THIS STUFF - These are the tests to use if the bomb layer test rig does NOT
+  // convert all Exceptions to PEs. We might want to test it both ways.
+  //
 //  def handleEX(testName: String) = {
 //    val h = new Handle("ThrowEX") {
 //      def f(s: String) =
