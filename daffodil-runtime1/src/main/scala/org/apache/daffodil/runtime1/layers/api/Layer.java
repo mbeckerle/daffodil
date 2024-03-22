@@ -19,7 +19,6 @@ package org.apache.daffodil.runtime1.layers.api;
 import org.apache.daffodil.runtime1.layers.LayerRuntime;
 import org.apache.daffodil.runtime1.layers.LayerUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -167,7 +166,7 @@ public abstract class Layer {
    * @param jis The input stream to be wrapped.
    * @return An input stream with the layer wrapped around it.
    */
-  public abstract InputStream wrapLayerInput(InputStream jis);
+  public abstract InputStream wrapLayerInput(InputStream jis) throws Exception;
 
   /**
    * Wraps a layer output interpreter around an output stream, using the provided LayerRuntimeFoo for runtime information and stateful services.
@@ -175,6 +174,31 @@ public abstract class Layer {
    * @param jos The output stream to be wrapped.
    * @return An output stream with the layer wrapped around it.
    */
-  public abstract OutputStream wrapLayerOutput(OutputStream jos);
+  public abstract OutputStream wrapLayerOutput(OutputStream jos) throws Exception;
+
+  private LayerThrowHandler lth = null;
+
+  public static interface LayerThrowHandler {
+    public void handleThrow(Throwable t);
+  }
+
+  /**
+   * If you set a layer throw handler, then if the layer code throws
+   * anything, the handler is invoked and can convert specific kinds of
+   * exceptions into processing errors or runtime SDEs.
+   *
+   * If the handler does not throw or call processingError or
+   * runtimeSchemaDefinitionError, then the throw is treated as
+   * if there was no handler, and propagates generally as a fatal error.
+   *
+   * @param lth the throw handler
+   */
+  public final void setLayerThrowHandler(LayerThrowHandler lth) {
+    this.lth = lth;
+  }
+
+  public final LayerThrowHandler getLayerThrowHandler() {
+    return this.lth;
+  }
 
 }

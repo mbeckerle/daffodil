@@ -18,7 +18,6 @@
 package org.apache.daffodil.layers.runtime1;
 
 import org.apache.daffodil.runtime1.layers.api.Layer;
-import os.write;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +25,6 @@ import java.io.OutputStream;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import static java.lang.Math.min;
 
 public final class GZipLayer extends Layer {
 
@@ -54,71 +51,30 @@ public final class GZipLayer extends Layer {
 
   public GZipLayer() {
     super("gzip", "urn:org.apache.daffodil.layers.gzip");
-  }
 
-  @Override
-  public InputStream wrapLayerInput(InputStream jis) {
-    InputStream gzs = null;
-    try {
-      gzs = new GZIPInputStream(jis) {
-        @Override
-        public int read() {
-          int result = 0;
-          try {
-            result = super.read();
-          } catch (Throwable t) {
-            // convert any I/O exception into a processing error
-            handleThrow(t);
-          }
-          return result;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) {
-          int result = 0;
-          try {
-            result = super.read(b, off, len);
-          } catch (Throwable t) {
-            handleThrow(t);
-          }
-          return result;
-        }
-
-        @Override
-        public void close() {
-          try {
-            super.close();
-          } catch (Throwable t) {
-            handleThrow(t);
-          }
-        }
-      };
-    } catch (Throwable t) {
-      handleThrow(t);
-    }
-    return gzs;
-  }
-
-  void handleThrow(Throwable t) {
-    try {
-      throw t;
-    } catch (IOException e) {
-      processingError(e);
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public OutputStream wrapLayerOutput(OutputStream jos){
-    OutputStream fixedOS = fixIsNeeded() ? new GZIPFixedOutputStream(jos) : jos;
-    OutputStream gzs = null;
-      try {
-          gzs = new GZIPOutputStream(fixedOS);
-      } catch (IOException e) {
-          processingError(e);
+    // we need a layer throw handler to convert any IOExceptions into
+    // processing errors so they can backtrack (i.e., are not fatal)
+    setLayerThrowHandler(new LayerThrowHandler() {
+      @Override
+      public void handleThrow(Throwable t) {
+        // Fuzz testing shows gzip does a good job converting all sorts of parse errors
+        // into IOException. If there were other kinds of exceptions thrown, we could also
+        // catch them here.
+        if (t instanceof IOException)
+          processingError(t);
       }
-      return gzs;
+    });
+  }
+
+  @Override
+  public InputStream wrapLayerInput(InputStream jis) throws Exception {
+    return new GZIPInputStream(jis);
+  }
+
+  @Override
+  public OutputStream wrapLayerOutput(OutputStream jos) throws Exception {
+    OutputStream fixedOS = fixIsNeeded() ? new GZIPFixedOutputStream(jos) : jos;
+    return new GZIPOutputStream(fixedOS);
   }
 
 }

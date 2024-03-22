@@ -17,12 +17,7 @@
 
 package org.apache.daffodil.runtime1.processors.parsers
 
-import org.apache.daffodil.lib.exceptions.UnsuppressableException
-import org.apache.daffodil.runtime1.dsom.RuntimeSchemaDefinitionError
 import org.apache.daffodil.runtime1.layers.LayerDriver
-import org.apache.daffodil.runtime1.layers.LayerFatalException
-import org.apache.daffodil.runtime1.layers.LayerProcessingException
-import org.apache.daffodil.runtime1.processors.ProcessingError
 import org.apache.daffodil.runtime1.processors.SequenceRuntimeData
 
 class LayeredSequenceParser(
@@ -33,9 +28,12 @@ class LayeredSequenceParser(
 
   override def parse(state: PState): Unit = {
 
+    var layerDriver: LayerDriver = null
     val savedDIS = state.dataInputStream
     try {
-      val layerDriver = LayerDriver(state, rd.layerRuntimeData)
+      layerDriver = LayerDriver(state, rd.layerRuntimeData)
+      layerDriver.init() // could fail if user's method causes errors
+
       val isAligned = savedDIS.align(layerDriver.mandatoryLayerAlignmentInBits, state)
       if (!isAligned)
         PE(
@@ -57,19 +55,8 @@ class LayeredSequenceParser(
         }
       }
     } catch {
-      case u: UnsuppressableException => throw u
-      case lre: LayerFatalException =>
-        throw lre
-      case re: RuntimeException =>
-        throw new LayerFatalException(re)
-      case pe: ProcessingError =>
-        throw pe
-      case rsde: RuntimeSchemaDefinitionError => throw rsde
-      case le: LayerProcessingException =>
-        state.toss(state.toProcessingError(le))
-      case e: Exception =>
-        throw new LayerFatalException(e)
-      // state.toss(state.toProcessingError(new LayerUnexpectedException(e)))
+      case t: Throwable if layerDriver ne null => layerDriver.handleThrowable(t)
+      case t: Throwable => LayerDriver.handleThrowableWithoutLayer(t)
     }
   }
 }

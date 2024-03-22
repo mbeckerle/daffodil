@@ -99,42 +99,44 @@ class TestLayers2 {
   //
   // Throwing from each place in the API
   //
-  def handleEX(testName: String) = {
-    val h = new Handle("ThrowEX") {
-      def f(s: String) =
-        intercept[Exception] {
-          runnerB.runOneTest(testName)
-        }.asInstanceOf[Exception]
-    }
-    h(testName)
-  }
-//  @Test def testBombSetterThrowEX(): Unit = runnerB.runOneTest("testBombSetterThrowEX")
-//  @Test def testBombGetterThrowEX(): Unit = runnerB.runOneTest("testBombGetterThrowEX")
-//  @Test def testBombReadThrowEX(): Unit = runnerB.runOneTest("testBombReadThrowEX")
-//  @Test def testBombCloseInputThrowEX(): Unit = runnerB.runOneTest("testBombCloseInputThrowEX")
-//  @Test def testBombWrapInputThrowEX(): Unit = runnerB.runOneTest("testBombWrapInputThrowEX")
-//  @Test def testBombWrapOutputThrowEX(): Unit = runnerB.runOneTest("testBombWrapOutputThrowEX")
-//  @Test def testBombWriteThrowEX(): Unit = runnerB.runOneTest("testBombWriteThrowEX")
-//  @Test def testBombWriteThrowEXWithSuspension(): Unit =
-//    runnerB.runOneTest("testBombWriteThrowEXWithSuspension")
-//  @Test def testBombCloseOutputThrowEX(): Unit =
-//    runnerB.runOneTest("testBombCloseOutputThrowEX")
-//  @Test def testBombCloseOutputThrowEXWithSuspension(): Unit =
-//    runnerB.runOneTest("testBombCloseOutputThrowEXWithSuspension")
 
-  @Test def testBombSetterThrowEX(): Unit = handleEX("testBombSetterThrowEX")
-  @Test def testBombGetterThrowEX(): Unit = handleEX("testBombGetterThrowEX")
-  @Test def testBombReadThrowEX(): Unit = handleEX("testBombReadThrowEX")
-  @Test def testBombCloseInputThrowEX(): Unit = handleEX("testBombCloseInputThrowEX")
-  @Test def testBombWrapInputThrowEX(): Unit = handleEX("testBombWrapInputThrowEX")
-  @Test def testBombWrapOutputThrowEX(): Unit = handleEX("testBombWrapOutputThrowEX")
-  @Test def testBombWriteThrowEX(): Unit = handleEX("testBombWriteThrowEX")
+  @Test def testBombSetterThrowEX(): Unit = runnerB.runOneTest("testBombSetterThrowEX")
+  @Test def testBombGetterThrowEX(): Unit = runnerB.runOneTest("testBombGetterThrowEX")
+  @Test def testBombReadThrowEX(): Unit = runnerB.runOneTest("testBombReadThrowEX")
+  @Test def testBombCloseInputThrowEX(): Unit = runnerB.runOneTest("testBombCloseInputThrowEX")
+  @Test def testBombWrapInputThrowEX(): Unit = runnerB.runOneTest("testBombWrapInputThrowEX")
+  @Test def testBombWrapOutputThrowEX(): Unit = runnerB.runOneTest("testBombWrapOutputThrowEX")
+  @Test def testBombWriteThrowEX(): Unit = runnerB.runOneTest("testBombWriteThrowEX")
   @Test def testBombWriteThrowEXWithSuspension(): Unit =
-    handleEX("testBombWriteThrowEXWithSuspension")
+    runnerB.runOneTest("testBombWriteThrowEXWithSuspension")
   @Test def testBombCloseOutputThrowEX(): Unit =
-    handleEX("testBombCloseOutputThrowEX")
+    runnerB.runOneTest("testBombCloseOutputThrowEX")
   @Test def testBombCloseOutputThrowEXWithSuspension(): Unit =
-    handleEX("testBombCloseOutputThrowEXWithSuspension")
+    runnerB.runOneTest("testBombCloseOutputThrowEXWithSuspension")
+
+//  def handleEX(testName: String) = {
+//    val h = new Handle("ThrowEX") {
+//      def f(s: String) =
+//        intercept[Exception] {
+//          runnerB.runOneTest(testName)
+//        }.asInstanceOf[Exception]
+//    }
+//    h(testName)
+//  }
+//  @Test def testBombSetterThrowEX(): Unit = handleEX("testBombSetterThrowEX")
+//  @Test def testBombGetterThrowEX(): Unit = handleEX("testBombGetterThrowEX")
+//  @Test def testBombReadThrowEX(): Unit = handleEX("testBombReadThrowEX")
+//  @Test def testBombCloseInputThrowEX(): Unit = handleEX("testBombCloseInputThrowEX")
+//  @Test def testBombWrapInputThrowEX(): Unit = handleEX("testBombWrapInputThrowEX")
+//  @Test def testBombWrapOutputThrowEX(): Unit = handleEX("testBombWrapOutputThrowEX")
+//  @Test def testBombWriteThrowEX(): Unit = handleEX("testBombWriteThrowEX")
+//  @Test def testBombWriteThrowEXWithSuspension(): Unit =
+//    handleEX("testBombWriteThrowEXWithSuspension")
+//  @Test def testBombCloseOutputThrowEX(): Unit =
+//    handleEX("testBombCloseOutputThrowEX")
+//  @Test def testBombCloseOutputThrowEXWithSuspension(): Unit =
+//    handleEX("testBombCloseOutputThrowEXWithSuspension")
+
   //
   // Runtime Exception thrown from each place in the API
   //
