@@ -985,7 +985,7 @@
       </tdml:documentPart>
     </tdml:document>
     <tdml:infoset>
-      <tdml:dfdlInfoset>f
+      <tdml:dfdlInfoset>
         <r1>15</r1>
       </tdml:dfdlInfoset>
     </tdml:infoset>
@@ -1041,7 +1041,7 @@
       </tdml:documentPart>
     </tdml:document>
     <tdml:infoset>
-      <tdml:dfdlInfoset>f
+      <tdml:dfdlInfoset>
         <r1>0.15</r1>
       </tdml:dfdlInfoset>
     </tdml:infoset>
